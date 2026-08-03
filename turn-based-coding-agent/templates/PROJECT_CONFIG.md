@@ -63,3 +63,8 @@
 - Quality thresholds:
 - Performance budgets:
 - Phase merge criteria:
+
+## Github Workflow
+
+- Logging requirements:
+- Artifact naming convention:
