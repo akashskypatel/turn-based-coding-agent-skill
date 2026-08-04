@@ -20,6 +20,7 @@
 
 ## Authoritative Sources
 
+- Design documents: `docs/design/*.md`
 - Milestone tracker: `docs/MILESTONE_3.md`
 - Remediation plan: `docs/parser-remediation.md`
 - Project notes: `notes/parser/*.md`

@@ -20,6 +20,7 @@
 
 ## Authoritative Sources
 
+- Design documents:
 - Milestone tracker:
 - Remediation plan:
 - Project notes:
