@@ -8,7 +8,6 @@ For turn-specific execution:
 - **Test + Benchmark:** download and execute the exact build artifact without rebuilding. Preserve raw logs and results.
 - **Review:** inspect repository, PR, evidence, logs, and plans without modifying implementation or validation logic.
 
-
 ## Purpose
 
 Use the connected `@GitHub` app as the primary control plane for a remote repository. When the connector cannot directly perform computation, apply a large change, or run repository tools, use a narrowly scoped GitHub Actions workflow as the remote execution plane and use Actions artifacts as the evidence plane.
@@ -43,7 +42,7 @@ Every workflow created or modified under this skill must:
 8. Never modify `.github/workflows/**` from inside a workflow. Workflow files are changed only through the connector or another explicitly authenticated client outside Actions.
 9. Preserve execution boundaries. A compile-only workflow must not execute tests, benchmarks, custom inputs, help/list commands, discovery commands, or compiled project binaries.
 
-Use `templates/logged-remote-task.yml` as the baseline.
+Use `templates/github-actions/logged-remote-task.yml` as the baseline.
 
 ## Start every task by resolving authority
 
@@ -177,7 +176,7 @@ A successful workflow step summary is not enough to close a gate. Verify the art
 
 ### Apply a large unified patch through Actions
 
-Use `templates/apply-unified-patch.yml`.
+Use `templates/github-actions/apply-unified-patch.yml`.
 
 1. Ensure the patch contains no `.github/workflows/**` changes.
 2. Split the patch into connector-sized parts if necessary.
@@ -254,10 +253,10 @@ End each task with:
 
 ## Supporting material
 
-- `references/COMMON_TASKS.md` — connector call sequences and detailed recipes.
-- `references/PITFALLS.md` — failure modes learned from remote workflow operation.
-- `references/TOOL_MAP.md` — action selection guide.
-- `templates/logged-remote-task.yml` — mandatory logging baseline.
-- `templates/apply-unified-patch.yml` — idempotent patch application workflow.
-- `templates/PR_BODY.md` — remote-work PR evidence template.
+- `references/github-connector-workflows/COMMON_TASKS.md` — connector call sequences and detailed recipes.
+- `references/github-connector-workflows/PITFALLS.md` — failure modes learned from remote workflow operation.
+- `references/github-connector-workflows/TOOL_MAP.md` — action selection guide.
+- `templates/github-actions/logged-remote-task.yml` — mandatory logging baseline.
+- `templates/github-actions/apply-unified-patch.yml` — idempotent patch application workflow.
+- `templates/github-actions/PR_BODY.md` — remote-work PR evidence template.
 - `scripts/split_patch.py` — deterministic patch chunking and digest generation.
