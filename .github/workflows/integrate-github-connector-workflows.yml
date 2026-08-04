@@ -18,7 +18,7 @@ concurrency:
 env:
   LOG_DIR: /tmp/integrate-github-connector-workflows-logs
   ACTIVITY_LOG: /tmp/integrate-github-connector-workflows-logs/activity.log
-  PAYLOAD_B64: .agents/connector-payloads/github-connector-workflows.tar.gz.b64
+  PAYLOAD_DIR: .agents/connector-payloads/github-connector-workflows
   PAYLOAD_TGZ: /tmp/github-connector-workflows.tar.gz
   PAYLOAD_SHA256: 135f164cc3b7c96a701711af9e0baa30dc7b3ebc431fc465a9ab9d2f77572bbd
 
@@ -90,9 +90,13 @@ jobs:
           echo "remote_branch_sha=$(git ls-remote origin refs/heads/$GITHUB_REF_NAME | cut -f1)"
           echo "authority_end"
           test "$(git rev-parse HEAD)" = "$(git ls-remote origin refs/heads/$GITHUB_REF_NAME | cut -f1)"
-          test -f "$PAYLOAD_B64"
+          test -d "$PAYLOAD_DIR"
 
-          base64 --decode "$PAYLOAD_B64" > "$PAYLOAD_TGZ"
+          mapfile -d '' payload_parts < <(find "$PAYLOAD_DIR" -maxdepth 1 -type f -name 'part-*' -print0 | LC_ALL=C sort -z)
+          echo "payload_part_count=${#payload_parts[@]}"
+          test "${#payload_parts[@]}" -gt 0
+          cat "${payload_parts[@]}" | base64 --decode > "$PAYLOAD_TGZ"
+
           actual_sha=$(sha256sum "$PAYLOAD_TGZ" | awk '{print $1}')
           echo "payload_sha256=$actual_sha"
           test "$actual_sha" = "$PAYLOAD_SHA256"
@@ -110,7 +114,7 @@ jobs:
           cp -a /tmp/github-connector-workflows-extract/README.md ./README.md
           cp -a /tmp/github-connector-workflows-extract/turn-based-coding-agent/. ./turn-based-coding-agent/
           rm -f .agents/connector-triggers/integrate-github-connector-workflows.txt
-          rm -f "$PAYLOAD_B64"
+          rm -rf "$PAYLOAD_DIR"
           rmdir .agents/connector-triggers 2>/dev/null || true
           rmdir .agents/connector-payloads 2>/dev/null || true
           rmdir .agents 2>/dev/null || true
