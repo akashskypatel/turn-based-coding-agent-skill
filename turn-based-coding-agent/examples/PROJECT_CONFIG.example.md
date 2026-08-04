@@ -3,6 +3,8 @@
 ## Repository
 
 - Repository: `owner/example-project`
+- Repository access mode: `github_connector`
+- GitHub connector name: `@GitHub`
 - Base branch: `main`
 - Working branch prefix: `agent/example-project`
 - Root TODO file: `TODO.md`
@@ -18,12 +20,30 @@
 
 ## Authoritative Sources
 
+- Design documents: `docs/design/*.md`
 - Milestone tracker: `docs/MILESTONE_3.md`
 - Remediation plan: `docs/parser-remediation.md`
 - Project notes: `notes/parser/*.md`
 - Architecture/contracts: `docs/file-format.md`
 - Failure diagnostics: `results/failed-recovery.md`
 - Existing results: `results/latest/`
+
+## Commands and Workflows
+
+- Build workflow: `.github/workflows/agent-parser-build.yml`
+- Test commands: packaged `parser_tests` filters followed by the full suite
+- Benchmark commands: packaged recovery corpus benchmark, four independent runs
+
+## GitHub Workflow Policy
+
+- Detailed logging: required for success and failure.
+- Log initialization: before checkout.
+- Log artifact: separate, uploaded under `if: always()` with `if-no-files-found: error`.
+- Result artifact: uploaded only after successful verification.
+- Failure diagnosis: use the downloaded detailed log artifact.
+- Compile-only workflow: execute no test or benchmark binary.
+- Workflow self-modification: forbidden.
+- Trigger: `workflow_dispatch` or one exact marker path.
 
 ## Review Policy
 
