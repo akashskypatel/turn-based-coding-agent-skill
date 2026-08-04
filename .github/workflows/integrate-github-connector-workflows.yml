@@ -6,6 +6,11 @@ on:
       - agent/integrate-github-connector-workflows
     paths:
       - .agents/connector-triggers/integrate-github-connector-workflows.txt
+  pull_request:
+    branches:
+      - master
+    paths:
+      - .agents/connector-triggers/integrate-github-connector-workflows.txt
   workflow_dispatch:
 
 permissions:
@@ -16,6 +21,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  TARGET_BRANCH: agent/integrate-github-connector-workflows
   LOG_DIR: /tmp/integrate-github-connector-workflows-logs
   ACTIVITY_LOG: /tmp/integrate-github-connector-workflows-logs/activity.log
   PAYLOAD_DIR: .agents/connector-payloads/github-connector-workflows
@@ -38,15 +44,17 @@ jobs:
             echo "event=$GITHUB_EVENT_NAME"
             echo "event_sha=$GITHUB_SHA"
             echo "ref=$GITHUB_REF"
+            echo "target_branch=$TARGET_BRANCH"
             echo "repository=$GITHUB_REPOSITORY"
             echo "runner_os=$RUNNER_OS"
             echo "runner_temp=$RUNNER_TEMP"
             echo "started_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           } | tee "$ACTIVITY_LOG"
 
-      - name: Checkout exact trigger source
+      - name: Checkout exact working branch
         uses: actions/checkout@v4
         with:
+          ref: agent/integrate-github-connector-workflows
           fetch-depth: 0
           persist-credentials: true
 
@@ -85,16 +93,16 @@ jobs:
           sha256sum --version | head -n 1
           echo "tool_versions_end"
 
-          echo "authority_begin"
-          echo "checked_out_sha=$(git rev-parse HEAD)"
-          echo "remote_branch_sha=$(git ls-remote origin refs/heads/$GITHUB_REF_NAME | cut -f1)"
-          echo "authority_end"
-          test "$(git rev-parse HEAD)" = "$(git ls-remote origin refs/heads/$GITHUB_REF_NAME | cut -f1)"
+          local_sha=$(git rev-parse HEAD)
+          remote_sha=$(git ls-remote origin "refs/heads/$TARGET_BRANCH" | cut -f1)
+          echo "checked_out_sha=$local_sha"
+          echo "remote_branch_sha=$remote_sha"
+          test "$local_sha" = "$remote_sha"
           test -d "$PAYLOAD_DIR"
 
           mapfile -d '' payload_parts < <(find "$PAYLOAD_DIR" -maxdepth 1 -type f -name 'part-*' -print0 | LC_ALL=C sort -z)
           echo "payload_part_count=${#payload_parts[@]}"
-          test "${#payload_parts[@]}" -gt 0
+          test "${#payload_parts[@]}" -eq 8
           cat "${payload_parts[@]}" | base64 --decode > "$PAYLOAD_TGZ"
 
           actual_sha=$(sha256sum "$PAYLOAD_TGZ" | awk '{print $1}')
@@ -132,11 +140,10 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           root = Path('turn-based-coding-agent')
-          manifest = root / 'manifest.txt'
           missing = []
           duplicates = []
           seen = set()
-          for raw in manifest.read_text(encoding='utf-8').splitlines():
+          for raw in (root / 'manifest.txt').read_text(encoding='utf-8').splitlines():
               path = raw.strip()
               if not path:
                   continue
@@ -166,7 +173,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "feat: integrate GitHub connector workflows module"
-          git push origin "HEAD:$GITHUB_REF_NAME"
+          git push origin "HEAD:$TARGET_BRANCH"
 
       - name: Write success summary
         if: steps.integrate.outcome == 'success'
