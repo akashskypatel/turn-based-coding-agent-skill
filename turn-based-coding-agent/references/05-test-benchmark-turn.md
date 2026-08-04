@@ -8,18 +8,31 @@ Validate the exact successfully built source commit, classify failures, and prod
 
 - Confirm the designated turn type is Test + Benchmark.
 - Confirm the implementation commit built successfully.
-- Identify the exact built evidence commit and the latest handoff commit.
-- Verify the evidence commit is reachable from the handoff commit and that only agent documentation changed between them.
+- Identify the exact built evidence commit and latest handoff commit.
+- Verify the evidence commit is reachable from the handoff commit and only allowed documentation changed between them.
 - Obtain artifacts built from the exact evidence commit.
-- Read the live handoff first and verify it matches the commit and pending validation scope.
-- Review acceptance criteria and this turn protocol.
+- Read the live handoff and verify the pending validation scope.
+- When artifacts or workflow evidence come from GitHub Actions, read `references/10-github-connector-workflows.md`.
+
+## Artifact integrity gate
+
+Before executing a packaged binary:
+
+1. Download the exact declared artifact through the connector.
+2. Verify the outer digest when supplied.
+3. Verify the recursive checksum manifest.
+4. Verify source commit, clean source status, dependency/submodule revisions, required binaries/libraries, and fixture/input closure.
+5. Extract into an arbitrary directory.
+6. Do not configure, compile, relink, patch, or regenerate code.
+
+If integrity fails, classify infrastructure status separately and do not claim product pass or fail.
 
 ## Allowed work
 
-- Retrieve compiled artifacts.
+- Retrieve compiled artifacts and detailed workflow logs.
 - Run focused, regression, integration, full-suite, and platform tests.
 - Run correctness, quality, performance, memory, and determinism benchmarks.
-- Collect logs, reports, traces, crash dumps, seeds, and output artifacts.
+- Collect logs, reports, traces, crash dumps, seeds, and outputs.
 - Compare results with accepted baselines.
 - Update TODO and validation-result documents.
 - Propose the next Code + Build action plan.
@@ -42,61 +55,38 @@ Use increasing scope where practical:
 3. Related regressions.
 4. Integration tests.
 5. Full suite.
-6. Required platform-specific validation.
+6. Required platform validation.
 
-Record the exact commit, commands, environment, filters, counts, runtime, and evidence locations.
+Record exact commit, artifact, commands, environment, filters, counts, duration, exit type, and evidence locations.
 
 ## Benchmark execution
 
-Compare against applicable baselines and budgets:
+Compare against last known good, previous phase, quality thresholds, runtime/memory budgets, and determinism requirements. Record inputs, repetition count, timing, memory, quality, variance, structural digests, and baseline differences.
 
-- Last known good revision.
-- Previous phase result.
-- Correctness and output-quality thresholds.
-- Runtime and memory budgets.
-- Determinism requirements.
+Faster execution is not success when correctness or quality regresses.
 
-Record inputs, repetition count, timing, memory, quality metrics, variance, and baseline difference. Faster execution is not success when correctness or quality regresses.
+## Remote evidence requirements
+
+- Preserve every raw log and machine-readable result.
+- Use the detailed workflow log artifact when diagnosing build or packaging failures.
+- Record result and log artifact IDs, names, digests, source SHA, and retention when relevant.
+- A green workflow summary does not prove artifact integrity or runtime correctness.
+- Do not trigger a compile workflow from a Test + Benchmark turn to replace an invalid artifact.
 
 ## Failure classifications
 
-### Production implementation failure
-
-The implementation violates the intended contract. Preserve the test and plan a production-code correction.
-
-### Structurally invalid test scenario
-
-The fixture cannot create the condition the test claims to validate. Explain the mismatch and plan a stronger valid fixture without weakening the intended assertion.
-
-### Incorrect test expectation
-
-The fixture is valid, but the assertion conflicts with an authoritative contract. Cite the contract and plan the expectation correction.
-
-### Infrastructure failure
-
-The environment or artifact prevents meaningful validation. Separate infrastructure status from product correctness and do not claim pass or fail without evidence.
-
-### Performance regression
-
-Functional behavior passes but an accepted budget regresses. Quantify significance and plan optimization without weakening correctness.
-
-### Nondeterministic failure
-
-Results vary across repeated runs. Preserve seeds and artifacts; investigate ordering, shared state, concurrency, undefined behavior, or numerical instability next turn.
+Classify each failure as production implementation, structurally invalid fixture, incorrect expectation, infrastructure, performance regression, or nondeterminism. Preserve evidence and avoid over-claiming certainty.
 
 ## Exit requirements
 
 - All requested validation results are recorded.
 - Every failure is classified with evidence.
 - Phase status is explicit: complete, incomplete, blocked, or regressed.
-- A proposed next Code + Build action plan exists.
-- The TODO records whether optional independent review is requested.
-- The live handoff is updated with the exact next turn, authoritative or pending plan, evidence references, missing procedure, and lessons from failures or invalid assumptions.
-- It records the validated evidence commit separately from the documentation-only handoff commit.
+- A proposed next Code + Build plan exists.
+- TODO records whether optional review is requested.
+- The live handoff records the exact next turn, evidence commit/artifact, authoritative or pending plan, missing procedure, and lessons.
 - Every agent entry-point document still links to the handoff.
 
-If review is skipped, this proposed plan becomes authoritative immediately.
-
-If review is requested, label this plan `proposed_pending_review`; the Review turn may supersede it.
+If review is skipped, the proposed plan becomes authoritative. If requested, label it `proposed_pending_review`.
 
 Use `templates/TEST_BENCHMARK_REPORT.md`.

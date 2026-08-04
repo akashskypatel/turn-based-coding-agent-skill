@@ -3,6 +3,8 @@
 ## Repository
 
 - Repository:
+- Repository access mode: local | github_connector | hybrid
+- GitHub connector name: `@GitHub`
 - Base branch:
 - Working branch prefix:
 - Root TODO file:
@@ -33,6 +35,7 @@
 - Test targets:
 - Benchmark targets:
 - Remote workflows:
+- Compile-only execution boundary:
 
 ### Test
 
@@ -42,6 +45,7 @@
 - Integration:
 - Full suite:
 - Platform-specific:
+- Artifact-only execution boundary:
 
 ### Benchmark
 
@@ -64,7 +68,23 @@
 - Performance budgets:
 - Phase merge criteria:
 
-## Github Workflow
+## GitHub Workflow Policy
 
-- Logging requirements:
+- Workflow files may be changed through: connector | authenticated external client
+- Workflow self-modification permitted: no
+- Required persistent log location: outside worktree
+- Detailed success/failure activity logging: required
+- Dedicated log artifact under `if: always()`: required
+- `if-no-files-found: error` for logs: required
+- Result artifacts separated from logs: required
+- Log artifact retention:
+- Result artifact retention:
 - Artifact naming convention:
+- Required run/source/ref metadata:
+- Required tool/build/test output:
+- Secret-tracing restrictions:
+- Trigger policy: workflow_dispatch | exact marker path | other
+- Concurrency policy:
+- Least-privilege permissions:
+- Failure diagnosis source: detailed log artifact
+- Temporary trigger/workflow cleanup policy:

@@ -1,16 +1,22 @@
 # Turn-Based Coding Agent Skill
 
-A progressive, multi-file coding-agent skill for production implementation work with strict separation between:
+A progressive coding-agent skill for production implementation work with strict separation between:
 
 ```text
 Code + Build -> Test + Benchmark -> [Optional Independent Review] -> Code + Build
 ```
 
+The package supports both local repositories and remote repositories operated through the connected `@GitHub` app. When direct repository execution is unavailable, the connector is the control plane, GitHub Actions is a bounded execution plane, and Actions artifacts are the evidence plane.
+
 ## Package layout
 
-- `SKILL.md` - small entry point and task router.
+- `SKILL.md` - compact entry point and task router.
 - `references/` - focused operating modules loaded by turn type.
-- `templates/` - project configuration, TODO, live handoff, and turn reports.
+- `references/10-github-connector-workflows.md` - remote GitHub and Actions operating model.
+- `references/github-connector-workflows/` - common recipes, pitfalls, and connector tool map.
+- `templates/` - project configuration, TODO, handoff, and turn reports.
+- `templates/github-actions/` - logged remote-task, verified patch, and PR evidence templates.
+- `scripts/split_patch.py` - deterministic unified-patch splitter.
 - `examples/` - minimal example configuration.
 - `manifest.txt` - package file list.
 
@@ -24,7 +30,7 @@ Extract or copy the complete `turn-based-coding-agent` directory into the skills
 ./install.sh /path/to/skills
 ```
 
-To replace an existing installation:
+Replace an existing installation:
 
 ```bash
 ./install.sh --force /path/to/skills
@@ -36,16 +42,16 @@ To replace an existing installation:
 .\install.ps1 -Destination 'C:\path\to\skills'
 ```
 
-To replace an existing installation:
+Replace an existing installation:
 
 ```powershell
 .\install.ps1 -Destination 'C:\path\to\skills' -Force
 ```
 
-The destination is intentionally explicit because different coding-agent hosts use different skill directories.
-
 ## Use
 
-Provide project-specific values using `templates/PROJECT_CONFIG.md`. On first use, the agent creates a concise project-local handoff from `templates/HANDOFF.md`, links it from all agent entry-point documents, and reads the initialization modules. On subsequent turns, it loads only the module for the designated turn plus shared integrity, recovery, and handoff modules.
+Provide project-specific values using `templates/PROJECT_CONFIG.md`. On first use, the agent creates a concise project-local handoff from `templates/HANDOFF.md`, links it from all agent entry-point documents, and reads the initialization modules.
+
+For a repository reachable only through `@GitHub`, configure the connector and workflow-policy fields, then load `references/10-github-connector-workflows.md`. Every remote workflow must retain detailed output on success and failure and upload a separate diagnostic log artifact under `if: always()`.
 
 The independent Review turn is optional. When skipped, the Test + Benchmark plan is authoritative. When used, the Review report supersedes it when amendments are made.

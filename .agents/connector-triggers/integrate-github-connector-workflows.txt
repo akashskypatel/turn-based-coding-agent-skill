@@ -1,3 +1,0 @@
-Integrate github-connector-workflows into turn-based-coding-agent.
-Payload SHA-256: 135f164cc3b7c96a701711af9e0baa30dc7b3ebc431fc465a9ab9d2f77572bbd
-Requested: 2026-08-04T08:42:00-07:00

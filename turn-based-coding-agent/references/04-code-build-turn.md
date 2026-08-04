@@ -10,9 +10,9 @@ Implement the active phase and prove that all affected targets compile. Runtime 
 - Read the authoritative next-action plan.
 - If an optional Review turn occurred, use its plan instead of the earlier Test + Benchmark proposal.
 - Confirm active branch, source commit, and clean starting state.
-- Synchronize local and remote state.
-- Read the live handoff first, then follow its referenced authoritative plan and evidence.
-- Review relevant project documents and this turn protocol.
+- Synchronize local, connector, and remote state as applicable.
+- Read the live handoff first, then its referenced plan and evidence.
+- When remote work uses `@GitHub` or Actions, read `references/10-github-connector-workflows.md` and the repository workflow policy.
 
 ## Allowed work
 
@@ -31,59 +31,49 @@ Implement the active phase and prove that all affected targets compile. Runtime 
 - Running benchmarks.
 - Executing runtime validation hidden inside another script.
 - Treating application smoke execution as a build step.
+- Running produced binaries for help, list, discovery, fixture inspection, or version output when the turn forbids binary execution.
 - Continuing into validation after the build succeeds.
 
 Inspect build scripts and workflows before invoking them. Disable or separate embedded runtime test steps when necessary.
 
+## Remote compile workflow contract
+
+When compilation occurs through GitHub Actions:
+
+1. Compile the exact pushed commit and verify checked-out SHA against the authoritative branch/ref.
+2. Initialize detailed logs before checkout and always upload the dedicated log artifact.
+3. Compile only the explicitly permitted targets.
+4. Do not execute produced binaries.
+5. Package binaries/libraries, exact source archive, source commit/status, dependency revisions, fixtures, configure/build logs, and recursive checksums.
+6. Upload the result artifact only on success and separately from logs.
+7. Record run, job, source SHA, artifact IDs, digests, and what did not run.
+
+Use `templates/github-actions/logged-remote-task.yml` as the logging baseline.
+
 ## Implementation rules
 
-The change must:
+The change must enforce documented domain invariants, apply to the supported input domain, preserve valid behavior, fail explicitly when safe completion is impossible, preserve useful diagnostics, and match existing architecture.
 
-- Enforce documented domain invariants.
-- Apply to the supported input domain.
-- Preserve valid behavior outside the failing scenario.
-- Fail explicitly when safe completion is impossible.
-- Preserve useful diagnostics.
-- Match existing architecture and conventions.
-
-Do not introduce:
-
-- Filename, fixture, or dataset recognition.
-- Test-only success paths.
-- Hard-coded golden output.
-- Unsupported tolerance inflation.
-- Environment-dependent bypasses.
-- Success without satisfying required invariants.
+Do not introduce fixture recognition, test-only success paths, hard-coded golden output, unsupported tolerance inflation, environment-dependent bypasses, or success without required invariants.
 
 Make surgical changes. Do not refactor or reformat unrelated code.
 
 ## Test changes in this turn
 
-Test code may be changed only to:
+Test code may change only to add intended coverage, correct a structurally invalid fixture, remove synthetic assumptions, or update expectations after an intentional documented contract change.
 
-- Add coverage for intended behavior.
-- Correct a fixture that cannot create its claimed scenario.
-- Remove synthetic assumptions that contradict the contract.
-- Update expectations after an intentional, documented contract change.
-
-For a fixture correction, document:
-
-1. Intended behavior.
-2. Why the old fixture was structurally invalid.
-3. How the new fixture creates the required condition.
-4. Which assertion proves the intended behavior.
-5. Why production code should not accommodate the invalid fixture.
+For a fixture correction, document the intended behavior, structural invalidity, corrected construction, proving assertion, and why production code should not accommodate the invalid fixture.
 
 Do not run the changed tests in this turn.
 
 ## Build loop
 
-Build every affected target. When compilation fails:
+When compilation fails:
 
-1. Diagnose the first actionable error.
+1. Diagnose the first actionable error from the full build or workflow log artifact.
 2. Determine whether active changes caused it.
 3. Apply the smallest correct fix.
-4. Update the TODO when diagnosis changes.
+4. Update TODO when diagnosis changes.
 5. Commit and push.
 6. Verify synchronization.
 7. Rebuild the exact pushed commit.
@@ -94,11 +84,11 @@ Continue until required builds succeed or a genuine external blocker is evidence
 
 - Intended changes are committed and pushed.
 - Required targets compile from the exact remote commit.
-- Working tree is clean.
-- No tests or benchmarks were run.
+- Source status is clean.
+- No tests or benchmarks ran.
+- Required result and detailed-log artifacts are verified.
 - The next Test + Benchmark commands and acceptance criteria are recorded.
-- The live handoff is updated with exact resume guidance, references, missing procedure, and newly learned failure-avoidance lessons.
-- If updated after the authoritative build, it is committed as documentation-only and records both the built evidence commit and handoff commit.
+- The live handoff contains exact resume guidance, references, missing procedure, and new failure-avoidance lessons.
 - Every agent entry-point document still links to the handoff.
 
-Use `templates/CODE_BUILD_REPORT.md` for the handoff.
+Use `templates/CODE_BUILD_REPORT.md`.

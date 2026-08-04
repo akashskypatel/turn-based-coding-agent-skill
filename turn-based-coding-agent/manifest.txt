@@ -14,9 +14,17 @@ references/06-optional-review-turn.md
 references/07-testing-integrity.md
 references/08-status-recovery-and-completion.md
 references/09-live-handoff.md
+references/10-github-connector-workflows.md
+references/github-connector-workflows/COMMON_TASKS.md
+references/github-connector-workflows/PITFALLS.md
+references/github-connector-workflows/TOOL_MAP.md
+scripts/split_patch.py
 templates/CODE_BUILD_REPORT.md
 templates/HANDOFF.md
 templates/PROJECT_CONFIG.md
 templates/REVIEW_REPORT.md
 templates/TEST_BENCHMARK_REPORT.md
 templates/TODO.md
+templates/github-actions/PR_BODY.md
+templates/github-actions/apply-unified-patch.yml
+templates/github-actions/logged-remote-task.yml
