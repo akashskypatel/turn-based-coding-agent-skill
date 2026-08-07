@@ -34,12 +34,14 @@ The reviewer must not rely only on prior summaries. It must inspect the relevant
 - Confirm reviewer independence.
 - Read the live handoff first and verify its resume state against primary evidence.
 - Verify repository and evidence references are accessible.
+- When unit-test design, fixture validity, expectation correctness, isolation, or mocking strategy is under review, load the companion `unit-testing` skill.
 
 ## Allowed work
 
 - Inspect source and validation diffs read-only.
 - Inspect build, test, benchmark, and diagnostic evidence.
 - Challenge root-cause claims and classifications.
+- Review unit-test quality with the companion `unit-testing` skill without editing tests.
 - Identify missing invariants, regressions, or scope errors.
 - Approve the proposed plan unchanged.
 - Amend, reorder, narrow, expand, or replace next-turn tasks.
@@ -65,10 +67,11 @@ The reviewer must not rely only on prior summaries. It must inspect the relevant
 4. Are simpler, safer, or more surgical changes available?
 5. Are relevant contracts or historical decisions missing?
 6. Are test changes justified without weakening intended validation?
-7. Are acceptance criteria observable and reproducible?
-8. Are phase scope and merge criteria appropriate?
-9. Does the plan preserve diagnostics, determinism, and supported behavior?
-10. What should the next Test + Benchmark turn validate?
+7. For unit tests, is the scenario focused, deterministic, behavior-oriented, and using the right collaborator fidelity/test level?
+8. Are acceptance criteria observable and reproducible?
+9. Are phase scope and merge criteria appropriate?
+10. Does the plan preserve diagnostics, determinism, and supported behavior?
+11. What should the next Test + Benchmark turn validate?
 
 ## Decision states
 

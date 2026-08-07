@@ -13,6 +13,7 @@ Implement the active phase and prove that all affected targets compile. Runtime 
 - Synchronize local, connector, and remote state as applicable.
 - Read the live handoff first, then its referenced plan and evidence.
 - When remote work uses `@GitHub` or Actions, read `references/10-github-connector-workflows.md` and the repository workflow policy.
+- When adding, repairing, or materially changing unit tests, load the companion `unit-testing` skill before editing test logic.
 
 ## Allowed work
 
@@ -57,6 +58,19 @@ The change must enforce documented domain invariants, apply to the supported inp
 Do not introduce fixture recognition, test-only success paths, hard-coded golden output, unsupported tolerance inflation, environment-dependent bypasses, or success without required invariants.
 
 Make surgical changes. Do not refactor or reformat unrelated code.
+
+## Unit-test design integration
+
+When unit tests are in scope, the companion `unit-testing` skill supplies the design standard for:
+
+- defining the unit and observable contract,
+- selecting focused scenarios and robust values,
+- controlling external dependencies and nondeterminism,
+- choosing real collaborators, fakes, stubs, or mocks,
+- writing narrow actionable assertions,
+- designing regression coverage that protects behavior rather than the fix implementation.
+
+The companion skill does not authorize test execution in this turn.
 
 ## Test changes in this turn
 

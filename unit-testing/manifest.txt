@@ -1,0 +1,12 @@
+README.md
+SKILL.md
+VERSION
+manifest.txt
+references/01-scope-and-contract.md
+references/02-case-design.md
+references/03-isolation-and-test-doubles.md
+references/04-assertions-and-diagnostics.md
+references/05-review-regression-and-coverage.md
+references/06-research-basis.md
+templates/UNIT_TEST_PLAN.md
+templates/UNIT_TEST_REVIEW.md
