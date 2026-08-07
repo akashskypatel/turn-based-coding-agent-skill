@@ -15,6 +15,20 @@ Tests must pass because implementation satisfies intended behavior. Never:
 - Regenerate golden outputs without reviewing semantic differences.
 - Change benchmark inputs solely to hide a regression.
 
+## Unit-test design authority
+
+When unit-test creation, repair, diagnosis, or quality review is in scope, load `modules/unit-testing/MODULE.md` for detailed guidance on:
+
+- observable contract and unit boundaries,
+- focused scenario and boundary-case design,
+- robust test values,
+- isolation and nondeterminism control,
+- fakes, stubs, mocks, and collaborator fidelity,
+- narrow actionable assertions,
+- regression-test quality and coverage interpretation.
+
+This file remains authoritative for integrity and test-versus-implementation diagnosis. The unit-testing module must never be used to weaken an assertion, legitimize fixture-specific production behavior, or violate the active turn boundary.
+
 ## Test-versus-implementation diagnosis
 
 When a test fails, separately establish:
@@ -38,6 +52,8 @@ A valid correction must:
 - Preserve or strengthen semantic assertions.
 - Avoid embedding expected implementation output in the fixture.
 - Include a regression explanation.
+
+For unit tests, additionally use `modules/unit-testing/MODULE.md` to confirm the fixture remains focused, deterministic, and independent of implementation details.
 
 ## Generalization review
 
