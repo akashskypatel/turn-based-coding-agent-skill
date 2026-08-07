@@ -34,14 +34,14 @@ The reviewer must not rely only on prior summaries. It must inspect the relevant
 - Confirm reviewer independence.
 - Read the live handoff first and verify its resume state against primary evidence.
 - Verify repository and evidence references are accessible.
-- When unit-test design, fixture validity, expectation correctness, isolation, or mocking strategy is under review, load the companion `unit-testing` skill.
+- When unit-test design, fixture validity, expectation correctness, isolation, or mocking strategy is under review, load `modules/unit-testing/MODULE.md`.
 
 ## Allowed work
 
 - Inspect source and validation diffs read-only.
 - Inspect build, test, benchmark, and diagnostic evidence.
 - Challenge root-cause claims and classifications.
-- Review unit-test quality with the companion `unit-testing` skill without editing tests.
+- Review unit-test quality with `modules/unit-testing/MODULE.md` without editing tests.
 - Identify missing invariants, regressions, or scope errors.
 - Approve the proposed plan unchanged.
 - Amend, reorder, narrow, expand, or replace next-turn tasks.

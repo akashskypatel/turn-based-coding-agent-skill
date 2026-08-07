@@ -17,7 +17,7 @@ Tests must pass because implementation satisfies intended behavior. Never:
 
 ## Unit-test design authority
 
-When unit-test creation, repair, or quality review is in scope and the companion `unit-testing` skill is available, load it for detailed guidance on:
+When unit-test creation, repair, diagnosis, or quality review is in scope, load `modules/unit-testing/MODULE.md` for detailed guidance on:
 
 - observable contract and unit boundaries,
 - focused scenario and boundary-case design,
@@ -27,7 +27,7 @@ When unit-test creation, repair, or quality review is in scope and the companion
 - narrow actionable assertions,
 - regression-test quality and coverage interpretation.
 
-This file remains authoritative for integrity and test-versus-implementation diagnosis. The companion skill must never be used to weaken an assertion, legitimize fixture-specific production behavior, or violate the active turn boundary.
+This file remains authoritative for integrity and test-versus-implementation diagnosis. The unit-testing module must never be used to weaken an assertion, legitimize fixture-specific production behavior, or violate the active turn boundary.
 
 ## Test-versus-implementation diagnosis
 
@@ -53,7 +53,7 @@ A valid correction must:
 - Avoid embedding expected implementation output in the fixture.
 - Include a regression explanation.
 
-For unit tests, additionally use the companion `unit-testing` skill to confirm the fixture remains focused, deterministic, and independent of implementation details.
+For unit tests, additionally use `modules/unit-testing/MODULE.md` to confirm the fixture remains focused, deterministic, and independent of implementation details.
 
 ## Generalization review
 

@@ -13,7 +13,7 @@ Validate the exact successfully built source commit, classify failures, and prod
 - Obtain artifacts built from the exact evidence commit.
 - Read the live handoff and verify the pending validation scope.
 - When artifacts or workflow evidence come from GitHub Actions, read `references/10-github-connector-workflows.md`.
-- When unit-test failures require fixture, expectation, assertion, isolation, or scope diagnosis, load the companion `unit-testing` skill for analysis only.
+- When unit-test failures require fixture, expectation, assertion, isolation, or scope diagnosis, load `modules/unit-testing/MODULE.md` for analysis only.
 
 ## Artifact integrity gate
 
@@ -35,7 +35,7 @@ If integrity fails, classify infrastructure status separately and do not claim p
 - Run correctness, quality, performance, memory, and determinism benchmarks.
 - Collect logs, reports, traces, crash dumps, seeds, and outputs.
 - Compare results with accepted baselines.
-- Analyze unit-test design using the companion `unit-testing` skill without editing test code.
+- Analyze unit-test design using `modules/unit-testing/MODULE.md` without editing test code.
 - Update TODO and validation-result documents.
 - Propose the next Code + Build action plan.
 
@@ -63,7 +63,7 @@ Record exact commit, artifact, commands, environment, filters, counts, duration,
 
 ## Unit-test diagnosis
 
-For a failing unit test, use the companion `unit-testing` skill to check whether:
+For a failing unit test, use `modules/unit-testing/MODULE.md` to check whether:
 
 - the asserted behavior is supported by an authoritative contract,
 - the fixture actually creates the claimed scenario,

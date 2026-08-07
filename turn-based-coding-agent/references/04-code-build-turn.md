@@ -13,7 +13,7 @@ Implement the active phase and prove that all affected targets compile. Runtime 
 - Synchronize local, connector, and remote state as applicable.
 - Read the live handoff first, then its referenced plan and evidence.
 - When remote work uses `@GitHub` or Actions, read `references/10-github-connector-workflows.md` and the repository workflow policy.
-- When adding, repairing, or materially changing unit tests, load the companion `unit-testing` skill before editing test logic.
+- When adding, repairing, or materially changing unit tests, load `modules/unit-testing/MODULE.md` before editing test logic.
 
 ## Allowed work
 
@@ -61,7 +61,7 @@ Make surgical changes. Do not refactor or reformat unrelated code.
 
 ## Unit-test design integration
 
-When unit tests are in scope, the companion `unit-testing` skill supplies the design standard for:
+When unit tests are in scope, `modules/unit-testing/MODULE.md` supplies the design standard for:
 
 - defining the unit and observable contract,
 - selecting focused scenarios and robust values,
@@ -70,7 +70,7 @@ When unit tests are in scope, the companion `unit-testing` skill supplies the de
 - writing narrow actionable assertions,
 - designing regression coverage that protects behavior rather than the fix implementation.
 
-The companion skill does not authorize test execution in this turn.
+The module does not authorize test execution in this turn.
 
 ## Test changes in this turn
 

@@ -5,6 +5,16 @@ examples/PROJECT_CONFIG.example.md
 install.ps1
 install.sh
 manifest.txt
+modules/unit-testing/MODULE.md
+modules/unit-testing/README.md
+modules/unit-testing/references/01-scope-and-contract.md
+modules/unit-testing/references/02-case-design.md
+modules/unit-testing/references/03-isolation-and-test-doubles.md
+modules/unit-testing/references/04-assertions-and-diagnostics.md
+modules/unit-testing/references/05-review-regression-and-coverage.md
+modules/unit-testing/references/06-research-basis.md
+modules/unit-testing/templates/UNIT_TEST_PLAN.md
+modules/unit-testing/templates/UNIT_TEST_REVIEW.md
 references/01-project-configuration.md
 references/02-initialization.md
 references/03-repository-workflow.md

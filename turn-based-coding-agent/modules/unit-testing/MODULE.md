@@ -1,11 +1,8 @@
----
-name: unit-testing
-description: Design, review, and repair focused unit tests that verify observable behavior with deterministic, isolated, maintainable, and actionable checks.
----
+# Unit Testing Module
 
-# Unit Testing
+Internal progressive-disclosure module for `turn-based-coding-agent`. Load it when creating unit tests, reviewing unit-test quality, adding regression coverage, correcting invalid unit-test fixtures, or deciding whether a check belongs at unit or integration scope.
 
-Use this skill when creating unit tests, reviewing unit-test quality, adding regression coverage, correcting invalid unit-test fixtures, or deciding whether a check belongs at unit or integration scope.
+This module is not a standalone skill and does not override the active turn boundary.
 
 ## Core contract
 
@@ -65,7 +62,7 @@ Read:
 
 ### Check research basis
 
-Read `references/06-research-basis.md` for the sources and rationale behind the rules in this skill.
+Read `references/06-research-basis.md` for the sources and rationale behind these rules.
 
 ## Non-negotiable rules
 
@@ -80,13 +77,13 @@ Read `references/06-research-basis.md` for the sources and rationale behind the 
 9. Prefer narrow semantic assertions over broad object snapshots or exact internal call sequences.
 10. Treat flaky tests as defects. Diagnose nondeterminism rather than masking it with retries.
 
-## Turn-based coding-agent integration
+## Turn integration
 
-When `turn-based-coding-agent` is active:
+When this module is active:
 
 - Unit-test source changes happen only during a **Code + Build** turn.
 - Unit tests execute only during a **Test + Benchmark** turn.
 - An optional **Review** turn may critique unit-test design and amend the next action plan, but does not edit test code.
-- The turn-based skill's testing-integrity rules remain authoritative for test-versus-implementation diagnosis.
+- `../../references/07-testing-integrity.md` remains authoritative for test-versus-implementation diagnosis and organic validation.
 
-This skill supplies unit-test design quality; it does not override the active turn boundary.
+This module supplies unit-test design quality; it does not authorize actions forbidden by the current turn.

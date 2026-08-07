@@ -1,6 +1,6 @@
 ---
 name: turn-based-coding-agent
-description: Production-harden software through separated code-and-build, test-and-benchmark, and optional independent-review turns with recoverable Git workflow, connector-first remote operations, evidence-based planning, and companion unit-test design guidance.
+description: Production-harden software through separated code-and-build, test-and-benchmark, and optional independent-review turns with recoverable Git workflow, connector-first remote operations, evidence-based planning, and integrated unit-test design guidance.
 ---
 
 # Turn-Based Coding Agent
@@ -33,7 +33,7 @@ Never combine turn types.
 8. Never weaken validation to conceal a product defect.
 9. When the repository is available only through `@GitHub`, use the connector as the control plane and a narrowly scoped GitHub Actions workflow only as the remote execution plane.
 10. Every created or modified GitHub Actions workflow must retain detailed activity on success and failure and must always upload a separate diagnostic log artifact.
-11. When unit-test design, repair, or review is in scope and the companion `unit-testing` skill is available, load it. Its design rules supplement this skill but never override the active turn boundary.
+11. When unit-test design, repair, diagnosis, or review is in scope, load `modules/unit-testing/MODULE.md`. Its design rules supplement this skill but never override the active turn boundary or `references/07-testing-integrity.md`.
 
 ## Progressive task index
 
@@ -60,7 +60,7 @@ Read:
 - `references/08-status-recovery-and-completion.md`
 - `references/09-live-handoff.md`
 - `references/10-github-connector-workflows.md` when the build or source changes are remote
-- companion `unit-testing` skill when adding, changing, or repairing unit tests
+- `modules/unit-testing/MODULE.md` when adding, changing, or repairing unit tests
 
 ### Test + Benchmark turn
 
@@ -71,7 +71,7 @@ Read:
 - `references/08-status-recovery-and-completion.md`
 - `references/09-live-handoff.md`
 - `references/10-github-connector-workflows.md` when retrieving Actions artifacts or diagnosing remote runs
-- companion `unit-testing` skill when classifying whether unit-test fixtures, expectations, isolation, or assertions are valid
+- `modules/unit-testing/MODULE.md` when classifying unit-test fixture, expectation, isolation, scope, or assertion validity
 
 ### Optional independent Review turn
 
@@ -81,19 +81,19 @@ Read:
 - `references/08-status-recovery-and-completion.md`
 - `references/09-live-handoff.md`
 - `references/10-github-connector-workflows.md` when remote PR, workflow, or artifact evidence is reviewed
-- companion `unit-testing` skill when unit-test design is part of the reviewed next-turn plan
+- `modules/unit-testing/MODULE.md` when unit-test design is part of the reviewed next-turn plan
 
-## Companion unit-testing skill
+## Integrated unit-testing module
 
-The repository also provides a standalone `unit-testing` skill. Use it for contract-first unit-test design, scenario selection, dependency isolation, test-double choice, assertion quality, regression-test design, and unit-test review.
+`modules/unit-testing/MODULE.md` is an internal progressive-disclosure module of this skill. It supplies research-backed guidance for contract-first unit-test design, scenario selection, dependency isolation, test-double choice, assertion quality, regression-test design, and test review.
 
 The separation of responsibilities is strict:
 
-- `turn-based-coding-agent` controls **when** test code may change or execute.
-- `unit-testing` controls **how** unit tests should be designed and reviewed.
+- the turn workflow controls **when** test code may change or execute;
+- the unit-testing module controls **how** unit tests should be designed and reviewed;
 - `references/07-testing-integrity.md` controls test-versus-implementation diagnosis and prohibits synthetic validation.
 
-If the companion skill is not installed, continue using `references/07-testing-integrity.md`; do not invent weaker test rules.
+Do not treat the module as a separate skill or install it independently.
 
 ## Remote GitHub routing
 
@@ -114,6 +114,8 @@ When no trusted local checkout is available:
 - `templates/CODE_BUILD_REPORT.md` - Code + Build handoff.
 - `templates/TEST_BENCHMARK_REPORT.md` - validation handoff.
 - `templates/REVIEW_REPORT.md` - optional independent review decision.
+- `modules/unit-testing/templates/UNIT_TEST_PLAN.md` - unit-test design plan when the test surface is non-trivial.
+- `modules/unit-testing/templates/UNIT_TEST_REVIEW.md` - structured unit-test quality review.
 - `templates/github-actions/logged-remote-task.yml` - mandatory logging baseline for bounded remote work.
 - `templates/github-actions/apply-unified-patch.yml` - idempotent large-patch application with output verification.
 - `templates/github-actions/PR_BODY.md` - remote workflow and artifact evidence template.
