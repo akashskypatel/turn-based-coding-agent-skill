@@ -28,6 +28,19 @@
 - Failure diagnostics:
 - Existing results:
 
+## Turn Execution Policy
+
+- Execution mode: canonical | granular | per_turn
+- Default Code + Build mode: canonical | granular
+- Default Test + Benchmark mode: canonical | granular
+- Granular subturn reports path/policy:
+- Temporary CB-DRAFT patch storage: ephemeral | agent artifact | repository path | other
+- Temporary patch persistence permitted: yes | no
+- Temporary patch cleanup policy:
+- Mandatory Test + Benchmark plan path/pattern:
+
+Canonical and granular modes have identical safety and acceptance requirements. Granular mode exposes resumable subturn boundaries defined in `references/11-granular-subturns.md`.
+
 ## Commands and Workflows
 
 ### Build
@@ -54,6 +67,16 @@
 - Performance:
 - Memory:
 - Determinism:
+
+## Test-Plan Policy
+
+- Plan template: `templates/TEST_PLAN.md` | project-specific equivalent
+- Required plan owner: Code + Build / CB-CLOSEOUT
+- Required evidence identity:
+- Required test ordering:
+- Required benchmark baselines/repetitions:
+- Required stop conditions:
+- Required evidence retention:
 
 ## Review Policy
 

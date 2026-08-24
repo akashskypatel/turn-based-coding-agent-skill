@@ -2,7 +2,7 @@
 
 Internal progressive-disclosure module for `turn-based-coding-agent`. Load it when creating unit tests, reviewing unit-test quality, adding regression coverage, correcting invalid unit-test fixtures, or deciding whether a check belongs at unit or integration scope.
 
-This module is not a standalone skill and does not override the active turn boundary.
+This module is not a standalone skill and does not override the active turn/subturn boundary.
 
 ## Core contract
 
@@ -77,13 +77,26 @@ Read `references/06-research-basis.md` for the sources and rationale behind thes
 9. Prefer narrow semantic assertions over broad object snapshots or exact internal call sequences.
 10. Treat flaky tests as defects. Diagnose nondeterminism rather than masking it with retries.
 
-## Turn integration
+## Turn and subturn integration
 
 When this module is active:
 
-- Unit-test source changes happen only during a **Code + Build** turn.
-- Unit tests execute only during a **Test + Benchmark** turn.
-- An optional **Review** turn may critique unit-test design and amend the next action plan, but does not edit test code.
-- `../../references/07-testing-integrity.md` remains authoritative for test-versus-implementation diagnosis and organic validation.
+### Canonical mode
 
-This module supplies unit-test design quality; it does not authorize actions forbidden by the current turn.
+- Unit-test source changes happen only during **Code + Build**.
+- Unit tests execute only during **Test + Benchmark**.
+- Optional **Review** may critique unit-test design and amend the next action plan, but does not edit test code.
+
+### Granular mode
+
+- **CB-DRAFT** may design unit-test source and include it in the draft patch.
+- **CB-APPLY** may apply/commit the reviewed unit-test patch, but may not execute it.
+- **CB-COMPILE** may compile the unit-test target, but may not execute tests or edit test logic.
+- **CB-CLOSEOUT** incorporates the unit-test cases into the mandatory Test + Benchmark plan.
+- **TB-EXEC** executes the planned unit tests.
+- **TB-REVIEW** uses this module to assess fixture, assertion, isolation, expectation, scope, and flakiness quality without editing tests.
+- **TB-PLAN** may propose future unit-test changes for the next Code + Build plan but may not edit tests.
+
+`../../references/07-testing-integrity.md` remains authoritative for test-versus-implementation diagnosis and organic validation.
+
+This module supplies unit-test design quality; it does not authorize actions forbidden by the current canonical turn or granular subturn.

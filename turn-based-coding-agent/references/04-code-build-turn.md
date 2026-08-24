@@ -2,16 +2,29 @@
 
 ## Purpose
 
-Implement the active phase and prove that all affected targets compile. Runtime tests and benchmarks are forbidden in this turn.
+Implement the active phase, prove that all affected targets compile, document the change, and produce the executable Test + Benchmark plan for the exact compiled evidence commit. Runtime tests and benchmarks are forbidden in this turn.
+
+A Code + Build turn may run canonically as one turn or use the optional granular decomposition in `references/11-granular-subturns.md`:
+
+```text
+CB-DRAFT -> CB-APPLY -> CB-COMPILE -> CB-CLOSEOUT
+    ^                         |
+    |------ compile FAIL -----|
+```
+
+Canonical mode must still satisfy the responsibilities represented by all four subturns.
 
 ## Entry checks
 
-- Confirm the designated turn type is Code + Build.
+- Confirm the designated canonical turn is Code + Build.
+- Record execution mode: canonical | granular.
+- If granular, confirm the exact active subturn.
 - Read the authoritative next-action plan.
 - If an optional Review turn occurred, use its plan instead of the earlier Test + Benchmark proposal.
 - Confirm active branch, source commit, and clean starting state.
 - Synchronize local, connector, and remote state as applicable.
 - Read the live handoff first, then its referenced plan and evidence.
+- Load `modules/engineering-guidelines/MODULE.md` before drafting implementation changes.
 - When remote work uses `@GitHub` or Actions, read `references/10-github-connector-workflows.md` and the repository workflow policy.
 - When adding, repairing, or materially changing unit tests, load `modules/unit-testing/MODULE.md` before editing test logic.
 
@@ -20,11 +33,14 @@ Implement the active phase and prove that all affected targets compile. Runtime 
 - Edit production code.
 - Edit tests and benchmark definitions when the plan requires valid coverage changes.
 - Edit build configuration.
-- Edit diagnostics, TODO, and documentation.
+- Edit diagnostics, TODO, handoff, reports, and documentation.
 - Compile libraries, applications, tests, benchmarks, plugins, and packaging targets.
 - Run compile-time checks and static analysis.
 - Use remote workflows to compile exact pushed commits.
 - Commit and push changes.
+- Draft the mandatory next-turn Test + Benchmark plan.
+
+Granular mode narrows these permissions further by subturn; follow `references/11-granular-subturns.md`.
 
 ## Forbidden work
 
@@ -33,9 +49,22 @@ Implement the active phase and prove that all affected targets compile. Runtime 
 - Executing runtime validation hidden inside another script.
 - Treating application smoke execution as a build step.
 - Running produced binaries for help, list, discovery, fixture inspection, or version output when the turn forbids binary execution.
-- Continuing into validation after the build succeeds.
+- Continuing into runtime validation after the build succeeds.
 
 Inspect build scripts and workflows before invoking them. Disable or separate embedded runtime test steps when necessary.
+
+## Engineering discipline
+
+Use `modules/engineering-guidelines/MODULE.md` as the implementation standard:
+
+- surface material assumptions,
+- prefer the simplest sufficient design,
+- keep the diff surgical,
+- match existing style,
+- avoid speculative behavior and unrelated cleanup,
+- define build and future runtime success criteria before implementation.
+
+Every changed line should trace to the active objective, required validation support, diagnostics, or build integration.
 
 ## Remote compile workflow contract
 
@@ -57,7 +86,7 @@ The change must enforce documented domain invariants, apply to the supported inp
 
 Do not introduce fixture recognition, test-only success paths, hard-coded golden output, unsupported tolerance inflation, environment-dependent bypasses, or success without required invariants.
 
-Make surgical changes. Do not refactor or reformat unrelated code.
+Do not refactor or reformat unrelated code.
 
 ## Unit-test design integration
 
@@ -78,9 +107,11 @@ Test code may change only to add intended coverage, correct a structurally inval
 
 For a fixture correction, document the intended behavior, structural invalidity, corrected construction, proving assertion, and why production code should not accommodate the invalid fixture.
 
-Do not run the changed tests in this turn.
+For a defect, prefer authoring or preserving focused reproduction/regression coverage during this turn. Compile it with the required test targets, but do not execute it until Test + Benchmark.
 
 ## Build loop
+
+### Canonical mode
 
 When compilation fails:
 
@@ -94,6 +125,29 @@ When compilation fails:
 
 Continue until required builds succeed or a genuine external blocker is evidenced.
 
+### Granular mode
+
+`CB-COMPILE` never edits implementation code. On FAIL it records evidence and returns to `CB-DRAFT`, which produces a corrective patch against the latest committed branch head. Then repeat `CB-DRAFT -> CB-APPLY -> CB-COMPILE` until PASS or a genuine blocker.
+
+## Mandatory Test + Benchmark plan
+
+A Code + Build turn is incomplete until it produces an executable validation plan for the exact successfully compiled evidence commit/artifact.
+
+Use `templates/TEST_PLAN.md` or an equivalent project-local plan. At minimum record:
+
+- exact evidence commit and artifacts,
+- validation objectives and intended behaviors/invariants,
+- ordered tests/benchmarks/commands,
+- fixtures, inputs, seeds, environment, and required dependencies,
+- focused and broader regression scope,
+- expected outcomes and explicit acceptance criteria,
+- benchmark baselines/repetitions where applicable,
+- evidence to preserve,
+- stop/blocker conditions,
+- plan-defined rerun or nondeterminism rules.
+
+This plan is drafted in CB-CLOSEOUT when granular mode is used. In canonical mode it is still a required closeout responsibility.
+
 ## Exit requirements
 
 - Intended changes are committed and pushed.
@@ -101,8 +155,14 @@ Continue until required builds succeed or a genuine external blocker is evidence
 - Source status is clean.
 - No tests or benchmarks ran.
 - Required result and detailed-log artifacts are verified.
-- The next Test + Benchmark commands and acceptance criteria are recorded.
+- Change documentation is current.
+- A concrete Test + Benchmark plan exists and references the exact evidence commit/artifact.
+- The live handoff identifies the plan and exact next turn/subturn.
 - The live handoff contains exact resume guidance, references, missing procedure, and new failure-avoidance lessons.
 - Every agent entry-point document still links to the handoff.
 
-Use `templates/CODE_BUILD_REPORT.md`.
+Next canonical turn: Test + Benchmark.
+
+When granular mode is enabled, the completed Code + Build sequence ends at CB-CLOSEOUT and the next subturn is TB-EXEC.
+
+Use `templates/CODE_BUILD_REPORT.md`. Use `templates/SUBTURN_REPORT.md` for granular subturn reports.

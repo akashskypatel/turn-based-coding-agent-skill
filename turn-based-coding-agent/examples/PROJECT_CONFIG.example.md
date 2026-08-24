@@ -28,11 +28,39 @@
 - Failure diagnostics: `results/failed-recovery.md`
 - Existing results: `results/latest/`
 
+## Turn Execution Policy
+
+- Execution mode: `per_turn`
+- Default Code + Build mode: `granular`
+- Default Test + Benchmark mode: `granular`
+- Temporary CB-DRAFT patch storage: agent artifact
+- Temporary patch persistence permitted: yes
+- Temporary patch cleanup: remove after CB-APPLY verifies committed source
+- Mandatory Test + Benchmark plan: `.agents/parser/TB_PLAN.md`
+
+Example granular sequence:
+
+```text
+CB-DRAFT -> CB-APPLY -> CB-COMPILE
+    ^                         |
+    |------ compile FAIL -----|
+CB-COMPILE PASS -> CB-CLOSEOUT -> TB-EXEC -> TB-REVIEW -> TB-PLAN
+```
+
 ## Commands and Workflows
 
 - Build workflow: `.github/workflows/agent-parser-build.yml`
 - Test commands: packaged `parser_tests` filters followed by the full suite
 - Benchmark commands: packaged recovery corpus benchmark, four independent runs
+
+## Test-Plan Policy
+
+- Plan owner: CB-CLOSEOUT
+- Evidence identity: exact successfully compiled source SHA and artifact digest
+- Order: defect reproduction -> focused parser regressions -> full parser suite -> corpus benchmark
+- Benchmark baseline: latest accepted parser baseline, four runs
+- Stop conditions: artifact mismatch, checksum failure, missing corpus, or invalid runner dependency
+- Evidence retention: raw test logs, machine-readable results, benchmark outputs, and artifact metadata
 
 ## GitHub Workflow Policy
 

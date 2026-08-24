@@ -10,10 +10,19 @@
 
 - Source diff:
 - Build evidence:
+- Test + Benchmark plan:
 - Test evidence:
 - Benchmark evidence:
 - Architecture/contracts:
 - Historical diagnostics:
+
+## Engineering-Guideline Review
+
+- Material assumptions challenged:
+- Simpler alternatives considered:
+- Unrelated/speculative work removed from plan:
+- Surgical scope confirmed:
+- Verifiable success criteria confirmed:
 
 ## Findings
 
@@ -29,9 +38,14 @@ Approved | approved with amendments | rejected and replaced | insufficient evide
 
 ## Authoritative Next Code + Build Plan
 
+- Execution mode: canonical | granular
+- First subturn when granular: CB-DRAFT
+
 1. Task
    - Rationale:
    - Required change:
+   - Assumptions/contract:
+   - Simplest sufficient approach:
    - Scope boundary:
    - Build verification:
    - Future validation:
@@ -58,5 +72,6 @@ Approved | approved with amendments | rejected and replaced | insufficient evide
 - Handoff commit:
 - Updated or verified unchanged:
 - Review-approved plan reference:
+- Next canonical turn/subturn:
 - Agent entry-point links verified:
 - New review lesson recorded, if any:
