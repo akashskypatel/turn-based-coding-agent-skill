@@ -1,79 +1,85 @@
 # Turn-Based Coding Agent Skill
 
-A progressive coding-agent skill for production implementation work with strict separation between:
+A progressive coding-agent skill for separated implementation, runtime validation, and optional independent review, with optional granular subturn control and strict on-demand context loading.
+
+## Runtime routing
+
+Normal resume is intentionally narrow:
 
 ```text
-Code + Build -> Test + Benchmark -> [Optional Independent Review] -> Code + Build
+SKILL.md
+-> project live handoff
+-> one references/turns/<STATE>.md
+-> only triggered modules/<capability>/MODULE.md
+-> only explicitly routed deep references/templates/evidence
 ```
 
-The package supports both local repositories and remote repositories operated through the connected `@GitHub` app. When direct repository execution is unavailable, the connector is the control plane, GitHub Actions is a bounded execution plane, and Actions artifacts are the evidence plane.
+Do not preload sibling turns or whole reference directories.
 
-## Integrated unit-testing module
+## Canonical and granular workflow
 
-Research-backed unit-test design and review guidance is bundled at `modules/unit-testing/`.
+```text
+Code + Build -> Test + Benchmark -> [Optional Review] -> Code + Build
 
-The module supplies the design standard for:
+CB-DRAFT -> CB-APPLY -> CB-COMPILE -> CB-CLOSEOUT
+    ^                         |
+    |------ compile FAIL -----|
 
-- observable contract and unit boundaries;
-- focused scenarios, boundaries, invariants, errors, and regressions;
-- robust non-default/distinct values;
-- deterministic isolation and test-double choice;
-- narrow, actionable assertions;
-- coverage and counterfactual test-effectiveness review.
+TB-EXEC -> TB-REVIEW -> TB-PLAN -> [Optional Review]
+```
 
-The main skill remains authoritative for turn boundaries and testing integrity:
-
-- unit-test edits happen only during Code + Build;
-- unit-test execution happens only during Test + Benchmark;
-- optional Review may critique test design and amend the next plan without editing tests.
+Every Code + Build path must finish with an executable Test + Benchmark plan for the exact successfully compiled evidence commit/artifact.
 
 ## Package layout
 
-- `SKILL.md` - compact entry point and task router.
-- `modules/unit-testing/` - internal unit-test design/review module.
-- `references/` - focused operating modules loaded by turn type.
-- `references/10-github-connector-workflows.md` - remote GitHub and Actions operating model.
-- `references/github-connector-workflows/` - common recipes, pitfalls, and connector tool map.
-- `templates/` - project configuration, TODO, handoff, and turn reports.
-- `templates/github-actions/` - logged remote-task, verified patch, and PR evidence templates.
-- `scripts/split_patch.py` - deterministic unified-patch splitter.
-- `examples/` - minimal example configuration.
-- `manifest.txt` - package file list.
+- `SKILL.md` — Tier-0 dispatcher and load policy.
+- `references/turns/` — one focused file per canonical turn/subturn.
+- `references/core/` — small shared boundary/evidence/recovery rules loaded only when declared.
+- `modules/engineering-guidelines/` — conditional implementation/planning guidance.
+- `modules/unit-testing/` — conditional unit-test design/review guidance.
+- `modules/github-connector/` — conditional remote GitHub routing.
+- `templates/` — load only when producing the corresponding artifact.
+- `references/04-*`, `05-*`, `06-*`, `11-*` — compatibility redirect stubs only.
 
-## Install manually
+Research, attribution, examples, and provenance references are cold storage and are not part of normal execution context.
 
-Extract or copy the complete `turn-based-coding-agent` directory into the skills directory used by your coding-agent host. Keep the directory name and internal layout intact. The unit-testing module is included automatically.
+## Handoff contract
 
-## Install with Bash
+Project handoffs based on `templates/HANDOFF.md` contain a `Context Load Plan`:
+
+```yaml
+load_next:
+  - references/turns/<exact-current-state>.md
+conditional_modules:
+  - trigger: <specific condition>
+    path: modules/<capability>/MODULE.md
+deep_references:
+  - <only if already known necessary>
+templates_when_producing:
+  - <only when artifact is produced>
+do_not_preload:
+  - sibling turn/subturn files
+  - module reference directories
+  - research/provenance/examples
+  - uncited historical reports
+```
+
+This lets a context-free successor resume without reconstructing state by reading the entire skill or repository history.
+
+## Installation
+
+Manual: copy this complete `turn-based-coding-agent` directory into the host skills directory.
+
+Bash:
 
 ```bash
 ./install.sh /path/to/skills
 ```
 
-Replace an existing installation:
-
-```bash
-./install.sh --force /path/to/skills
-```
-
-## Install with PowerShell
+PowerShell:
 
 ```powershell
 .\install.ps1 -Destination 'C:\path\to\skills'
 ```
 
-Replace an existing installation:
-
-```powershell
-.\install.ps1 -Destination 'C:\path\to\skills' -Force
-```
-
-## Use
-
-Provide project-specific values using `templates/PROJECT_CONFIG.md`. On first use, the agent creates a concise project-local handoff from `templates/HANDOFF.md`, links it from all agent entry-point documents, and reads the initialization modules.
-
-For a repository reachable only through `@GitHub`, configure the connector and workflow-policy fields, then load `references/10-github-connector-workflows.md`. Every remote workflow must retain detailed output on success and failure and upload a separate diagnostic log artifact under `if: always()`.
-
-The independent Review turn is optional. When skipped, the Test + Benchmark plan is authoritative. When used, the Review report supersedes it when amendments are made.
-
-When unit tests are in scope, follow the routing in `SKILL.md` to `modules/unit-testing/MODULE.md` and load only its focused references needed for the task.
+Use `--force` / `-Force` to replace an existing installation.

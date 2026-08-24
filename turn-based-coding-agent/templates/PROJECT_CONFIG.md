@@ -8,8 +8,26 @@
 - Base branch:
 - Working branch prefix:
 - Root TODO file:
-- Live handoff file (under agent documentation):
+- Live handoff file:
 - Agent entry-point documents:
+
+## Workflow Control
+
+- Execution mode: canonical | granular | per_turn
+- Current canonical turn:
+- Current subturn/state:
+- Review policy: never | optional | required-when-criteria-match
+
+## Context Loading
+
+- Policy: strict_on_demand
+- Handoff must provide exact `load_next`: required
+- Preload sibling turn files: no
+- Preload module reference directories: no
+- Preload templates: no
+- Research/provenance/examples during normal execution: no
+- Historical reports: only when cited by handoff/current turn
+- Project-specific additional always-load files, if truly unavoidable:
 
 ## Objective and Scope
 
@@ -20,9 +38,11 @@
 
 ## Authoritative Sources
 
+Record paths first. Do not preload their contents.
+
 - Design documents:
 - Milestone tracker:
-- Remediation plan:
+- Remediation/implementation plan:
 - Project notes:
 - Architecture/contracts:
 - Failure diagnostics:
@@ -31,7 +51,6 @@
 ## Commands and Workflows
 
 ### Build
-
 - Core targets:
 - Test targets:
 - Benchmark targets:
@@ -39,7 +58,6 @@
 - Compile-only execution boundary:
 
 ### Test
-
 - Reproduction:
 - Focused:
 - Regression:
@@ -49,17 +67,10 @@
 - Artifact-only execution boundary:
 
 ### Benchmark
-
 - Correctness/quality:
 - Performance:
 - Memory:
 - Determinism:
-
-## Review Policy
-
-- Policy: optional
-- Review required when:
-- Review may be skipped when:
 
 ## Acceptance Criteria
 
@@ -73,19 +84,11 @@
 
 - Workflow files may be changed through: connector | authenticated external client
 - Workflow self-modification permitted: no
-- Required persistent log location: outside worktree
 - Detailed success/failure activity logging: required
 - Dedicated log artifact under `if: always()`: required
-- `if-no-files-found: error` for logs: required
 - Result artifacts separated from logs: required
-- Log artifact retention:
-- Result artifact retention:
-- Artifact naming convention:
-- Required run/source/ref metadata:
-- Required tool/build/test output:
-- Secret-tracing restrictions:
-- Trigger policy: workflow_dispatch | exact marker path | other
-- Concurrency policy:
+- Artifact naming/retention:
+- Trigger/concurrency policy:
 - Least-privilege permissions:
-- Failure diagnosis source: detailed log artifact
+- Secret-tracing restrictions:
 - Temporary trigger/workflow cleanup policy:

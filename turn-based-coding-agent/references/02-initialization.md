@@ -1,90 +1,63 @@
 # One-Time Initialization
 
-Complete this process before entering the turn cadence or when repository state must be reconstructed.
+**Context class:** `conditional-turn`
 
-## 1. Read authoritative material
+Load only for first use, project reset, or recovery when no trustworthy current handoff exists.
 
-Review:
+Do not eagerly read all repository documentation. Initialization uses staged discovery.
 
-- Current TODO and milestone state.
-- Implementation and remediation plans.
-- Architecture records and public contracts.
-- Project notes and white papers.
-- Previous failure diagnostics.
-- Current test and benchmark results.
-- CI, build, test, and benchmark definitions.
-- Relevant production and validation code.
+## 1. Establish state from cheap sources
 
-Do not begin implementation from the high-level task description alone.
+Read first:
 
-## 2. Inspect repository state
+- repository root/agent entry instructions;
+- existing live handoff, if any;
+- root TODO/current milestone pointer;
+- project configuration or obvious build/CI entry points.
 
-Determine:
+Inventory other potentially authoritative documents by path/title before opening them.
 
-- Base-branch head.
-- Existing active working branches.
-- Unmerged or abandoned work.
-- Staged, unstaged, and untracked changes.
-- Existing patch artifacts explicitly identified as authoritative.
-- Current build state.
-- Known test failures and benchmark regressions.
-- Whether prior work stopped in a recoverable state.
+## 2. Resolve only material unknowns
 
-## 3. Clone efficiently
+Open additional design plans, architecture/contracts, failure reports, test results, benchmark results, notes, or CI files only when needed to resolve:
 
-Use a shallow single-branch clone unless history is required:
+- current phase/objective;
+- authoritative next action;
+- repository/branch state;
+- build/test/benchmark commands;
+- correctness/acceptance criteria;
+- a contradiction or known failure relevant to the active phase.
 
-```bash
-git clone --depth 1 --branch <base_branch> --single-branch <repository>
-```
+Do not read historical notes, old result directories, unrelated architecture, or all workflows for completeness.
 
-Initialize required submodules with shallow history:
+## 3. Inspect repository state
 
-```bash
-git submodule update --init --recursive --depth 1
-```
+Determine base head, active work branch, unmerged work, dirty/untracked changes, authoritative pending patch artifacts, current build evidence, and known relevant validation failures.
 
-Fetch additional history only when a concrete investigation requires it.
+Use a shallow clone/submodule fetch unless concrete investigation needs history.
 
-## 4. Create or normalize the root TODO and live handoff
+## 4. Normalize project state
 
-The root TODO must record:
+Create/update:
 
-- Objective and current phase.
-- Base and active working branches.
-- Current source commit.
-- Last completed turn and next turn.
-- Completed, active, blocked, and deferred tasks.
-- Known validation failures and regressions.
-- Commands or workflows needed next.
-- Recovery instructions.
+- `templates/PROJECT_CONFIG.md` equivalent;
+- root TODO;
+- live handoff;
+- links to the handoff from agent entry points.
 
-Use `templates/TODO.md`.
+The handoff must include a `Context Load Plan` with exactly one primary `load_next` turn/subturn file plus only triggered capability modules.
 
-Create or normalize the configured handoff file using `templates/HANDOFF.md`. It must let a new coding agent with no chat context identify the exact next turn, authoritative plan, required evidence, unresolved risks, and resume procedure. Keep it concise by linking to existing documents instead of copying them.
+## 5. Initial assessment
 
-Add a visible link to the handoff from every configured or detected agent entry-point document. Do not duplicate the handoff contents in those entry points.
+Report implemented/missing behavior, relevant risks, current build/validation status, material documentation conflicts, phase boundary, and the first Code + Build plan.
 
-Read `references/09-live-handoff.md` for the complete contract.
+Use `modules/engineering-guidelines/MODULE.md` only when designing that first implementation plan.
 
-## 5. Produce the initial assessment
+## 6. Start
 
-Report:
+Create the phase work branch and set the next state:
 
-- Implemented behavior.
-- Missing or incomplete behavior.
-- Known correctness and architecture risks.
-- Build, test, and benchmark status.
-- Documentation contradictions that affect implementation.
-- Recommended achievable phase boundaries.
-- The first Code + Build task list.
+- canonical mode: `references/turns/CB.md`
+- granular mode: `references/turns/CB-DRAFT.md`
 
-## 6. Create the first phase branch
-
-Use:
-
-```text
-<work_branch_prefix>/<phase-name>
-```
-
-A phase must be coherent, independently buildable, independently testable, and associated with explicit success criteria.
+Write that exact path into the handoff `load_next` field. Do not preload later turn files.

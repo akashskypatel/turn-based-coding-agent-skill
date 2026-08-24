@@ -22,10 +22,24 @@ Resolve project-specific values before beginning work. Do not silently invent ma
 - `repository_access_mode`: `local`, `github_connector`, or `hybrid`.
 - `github_workflow_policy`: repository-specific requirements for logging, artifacts, permissions, triggers, execution boundaries, and cleanup.
 - `review_policy`: `never`, `optional`, or criteria describing when an independent review should be used.
+- `turn_execution_mode`: `canonical`, `granular`, or `per_turn`.
+- `cb_execution_mode` and `tb_execution_mode`: defaults when `per_turn` is used.
+- `draft_patch_policy`: where a temporary CB-DRAFT patch may live, whether it may persist between agents, and how it is cleaned up after CB-APPLY.
+- `test_plan_policy`: authoritative path/pattern, required contents, evidence retention, and stop/rerun rules for the mandatory Test + Benchmark plan.
 
 Use `templates/PROJECT_CONFIG.md` as the project-local configuration record. Use `templates/HANDOFF.md` for the live handoff.
 
 When `repository_access_mode` is `github_connector` or `hybrid`, load `references/10-github-connector-workflows.md` before any remote mutation or workflow execution.
+
+When `turn_execution_mode` is `granular` or `per_turn`, load `references/11-granular-subturns.md` before beginning the affected canonical turn.
+
+## Execution-mode semantics
+
+- `canonical`: Code + Build and Test + Benchmark each execute as one turn, but still satisfy all granular responsibilities internally.
+- `granular`: Code + Build exposes CB-DRAFT, CB-APPLY, CB-COMPILE, CB-CLOSEOUT; Test + Benchmark exposes TB-EXEC, TB-REVIEW, TB-PLAN.
+- `per_turn`: choose canonical or granular at the start of each canonical turn and record the choice in TODO/handoff before work.
+
+Granularity changes resumability and permission boundaries, not acceptance standards.
 
 ## Resolution order
 
@@ -49,7 +63,7 @@ Unless repository policy is stricter, every created or modified workflow must:
 - upload a dedicated log artifact under `if: always()` and `if-no-files-found: error`;
 - keep diagnostic logs separate from valid result/build artifacts;
 - avoid exposing tokens, secrets, credentials, or authenticated URLs;
-- preserve the active turn boundary;
+- preserve the active canonical turn and granular subturn boundary;
 - avoid modifying `.github/workflows/**` from inside a workflow.
 
 Record artifact naming, retention, and failure-debugging requirements explicitly.
@@ -65,6 +79,10 @@ Record:
 - Failure behavior.
 - Performance or quality budgets.
 - Phase-level acceptance criteria.
+
+## Engineering discipline
+
+Load `modules/engineering-guidelines/MODULE.md` before implementation planning. Project configuration should not silently authorize speculative complexity or broad refactoring. Record project-specific constraints only when they are real requirements.
 
 ## Generalization check
 

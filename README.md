@@ -6,39 +6,72 @@ A modular coding-agent skill for disciplined, recoverable software implementatio
 Code + Build -> Test + Benchmark -> [Optional Independent Review] -> Code + Build
 ```
 
-The skill is intended for multi-turn feature development, remediation, refactoring, and production-hardening where correctness, exact evidence provenance, clean handoffs, and recoverable Git state matter more than making one fixture pass.
+Optional granular control:
 
-## Features
+```text
+CB-DRAFT -> CB-APPLY -> CB-COMPILE -> CB-CLOSEOUT
+    ^                         |
+    |------ compile FAIL -----|
 
-- Strict Code + Build, Test + Benchmark, and optional Review separation.
+TB-EXEC -> TB-REVIEW -> TB-PLAN -> [Optional Review]
+```
+
+## Key features
+
+- Strict Code + Build, Test + Benchmark, and optional independent Review boundaries.
+- Optional resumable CB/TB subturns for finer workflow control.
+- Mandatory Test + Benchmark plan produced by every Code + Build turn.
 - Exact pushed-commit provenance for builds and runtime evidence.
 - Recoverable phase branches, TODO tracking, and concise live handoffs.
-- Independent review agents may revise the next Code + Build plan without modifying source.
-- Testing-integrity rules distinguish production defects from invalid fixtures, incorrect expectations, infrastructure failures, regressions, and nondeterminism.
-- Integrated research-backed unit-testing module for test design and review.
-- Connector-first remote operation through `@GitHub` with bounded GitHub Actions execution when required.
-- Progressive disclosure through focused references, modules, and reusable templates.
+- Integrated unit-testing module for behavior-oriented test design/review.
+- Integrated engineering-guidelines module for assumptions, simplicity, surgical diffs, and verifiable goals.
+- Connector-first remote operation through `@GitHub` with bounded Actions execution.
+- **Strict on-demand context loading** so agents do not preload the whole skill/reference tree.
 
-## Integrated Unit-Testing Module
+## Demand-driven context model
 
-Unit testing is bundled inside the skill at `turn-based-coding-agent/modules/unit-testing/` and is loaded only when unit-test design, repair, diagnosis, or review is in scope.
+`SKILL.md` is intentionally a small dispatcher. Normal resume should follow:
 
-It provides:
+```text
+SKILL.md
+  -> project HANDOFF.md
+  -> exactly one references/turns/<STATE>.md
+  -> only triggered capability MODULE.md files
+  -> only specifically routed deep references/templates/evidence
+```
 
-- Contract-first, observable-behavior test design.
-- Unit-versus-integration boundary guidance.
-- Focused Arrange/Act/Assert scenarios.
-- Boundary, invalid-input, invariant, state-transition, and regression case design.
-- Robust values that expose ignored, swapped, or defaulted inputs.
-- Isolation of time, randomness, global state, infrastructure, and test ordering.
-- Fidelity-aware guidance for real collaborators, fakes, stubs, spies, and mocks.
-- Narrow semantic assertions and actionable failure diagnostics.
-- Counterfactual and optional mutation-testing review of test effectiveness.
-- Coverage treated as a risk/gap signal rather than proof of correctness.
+The handoff precomputes a `Context Load Plan` with `load_next`, conditional modules, and explicit `do_not_preload` guidance.
 
-The module is subordinate to the turn cadence: unit-test source changes happen only during Code + Build; unit-test execution happens only during Test + Benchmark; optional Review may critique test design but may not edit it.
+Context tiers:
 
-The research basis is documented in `turn-based-coding-agent/modules/unit-testing/references/06-research-basis.md`.
+```text
+Tier 0  SKILL.md dispatcher
+Tier 1  current canonical turn/subturn file
+Tier 2  conditional capability modules
+Tier 3  deep references/templates/research
+```
+
+Rules intentionally forbid reading sibling turn files, whole module reference directories, research/provenance, templates, or historical reports "for completeness."
+
+## Integrated modules
+
+### Unit testing
+
+`turn-based-coding-agent/modules/unit-testing/`
+
+Loaded only when unit-test design, repair, diagnosis, or review is materially in scope. It is normally **not** loaded for `CB-COMPILE` or `TB-EXEC`.
+
+### Engineering guidelines
+
+`turn-based-coding-agent/modules/engineering-guidelines/`
+
+Loaded for implementation design/corrective planning and independent review, not routine apply/compile/runtime execution.
+
+### GitHub connector
+
+`turn-based-coding-agent/modules/github-connector/MODULE.md`
+
+Loaded only for `github_connector`/`hybrid` access or GitHub Actions/artifact operations, then routes to the minimum detailed connector reference needed.
 
 ## Repository layout
 
@@ -49,33 +82,30 @@ turn-based-coding-agent-skill/
 └── turn-based-coding-agent/
     ├── SKILL.md
     ├── modules/
+    │   ├── engineering-guidelines/
+    │   ├── github-connector/
     │   └── unit-testing/
-    │       ├── MODULE.md
-    │       ├── references/
-    │       └── templates/
     ├── references/
+    │   ├── core/
+    │   ├── turns/
+    │   └── ...
     ├── templates/
     └── ...
 ```
 
-## Installation
+Legacy `references/04-*`, `05-*`, `06-*`, and `11-*` paths remain as tiny compatibility routers so existing handoffs can redirect to the focused turn files without loading old monolithic procedures.
 
-Clone the repository:
+## Installation
 
 ```bash
 git clone https://github.com/akashskypatel/turn-based-coding-agent-skill.git
-```
-
-### Bash
-
-```bash
 cd turn-based-coding-agent-skill/turn-based-coding-agent
 ./install.sh /path/to/skills
 ```
 
 Use `--force` to replace an existing installation.
 
-### PowerShell
+PowerShell:
 
 ```powershell
 Set-Location turn-based-coding-agent-skill\turn-based-coding-agent
@@ -84,18 +114,4 @@ Set-Location turn-based-coding-agent-skill\turn-based-coding-agent
 
 Use `-Force` to replace an existing installation.
 
-### Manual
-
-Copy the complete `turn-based-coding-agent` directory into the skills directory recognized by the coding-agent host. The unit-testing module is installed automatically because it is part of that directory.
-
-The resulting entry point is:
-
-```text
-/path/to/skills/turn-based-coding-agent/SKILL.md
-```
-
-## Use
-
-Invoke `turn-based-coding-agent` for the implementation project. The entry skill routes to the integrated unit-testing module automatically when the active turn involves unit-test design, fixture/expectation diagnosis, or independent review of unit-test changes.
-
-The module never overrides the active turn boundary or the skill's testing-integrity rules.
+Manual installation: copy the complete `turn-based-coding-agent` directory into the coding-agent host's skills directory. The only installable skill entry point is `turn-based-coding-agent/SKILL.md`; internal modules are bundled automatically.
