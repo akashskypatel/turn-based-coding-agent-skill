@@ -38,10 +38,26 @@ Every Code + Build path must finish with an executable Test + Benchmark plan for
 - `modules/engineering-guidelines/` — conditional implementation/planning guidance.
 - `modules/unit-testing/` — conditional unit-test design/review guidance.
 - `modules/github-connector/` — conditional remote GitHub routing.
+- `references/github-connector-workflows/PATCH_APPLICATION.md` — 19 KB connector write ceiling and deterministic compressed patch transport.
+- `references/github-connector-workflows/WORKFLOW_POLICY.md` — generalized durable Actions policy.
+- `references/github-connector-workflows/TEMP_WORKFLOW_LIFECYCLE.md` — exact temporary caller/marker procedure.
 - `templates/` — load only when producing the corresponding artifact.
-- `references/04-*`, `05-*`, `06-*`, `11-*` — compatibility redirect stubs only.
+- `references/04-*`, `05-*`, `06-*`, `10-*`, `11-*` — compatibility redirect/router paths only.
 
 Research, attribution, examples, and provenance references are cold storage and are not part of normal execution context.
+
+## GitHub connector safety
+
+For connector-based writes:
+
+- keep every individual content-bearing write at or below **19 KB UTF-8**;
+- use direct connector writes when all individual writes fit;
+- otherwise use deterministic gzip+Base64 patch payloads;
+- split the exact Base64 stream into ordered <=19 KB fragments only when necessary;
+- verify encoded and decoded patch SHA-256 values;
+- require `git apply --check`, `git diff --check`, and exact intended changed-path verification before commit.
+
+`scripts/split_patch.py` prepares the payload. `templates/github-actions/apply-unified-patch.yml` is the verified application baseline.
 
 ## Handoff contract
 

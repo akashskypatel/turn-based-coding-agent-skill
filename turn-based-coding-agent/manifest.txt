@@ -35,8 +35,11 @@ references/core/evidence.md
 references/core/recovery.md
 references/core/turn-boundaries.md
 references/github-connector-workflows/COMMON_TASKS.md
+references/github-connector-workflows/PATCH_APPLICATION.md
 references/github-connector-workflows/PITFALLS.md
+references/github-connector-workflows/TEMP_WORKFLOW_LIFECYCLE.md
 references/github-connector-workflows/TOOL_MAP.md
+references/github-connector-workflows/WORKFLOW_POLICY.md
 references/turns/CB.md
 references/turns/CB-DRAFT.md
 references/turns/CB-APPLY.md

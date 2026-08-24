@@ -26,6 +26,8 @@ TB-EXEC -> TB-REVIEW -> TB-PLAN -> [Optional Review]
 - Integrated unit-testing module for behavior-oriented test design/review.
 - Integrated engineering-guidelines module for assumptions, simplicity, surgical diffs, and verifiable goals.
 - Connector-first remote operation through `@GitHub` with bounded Actions execution.
+- GitHub workflow policy derived from production agent experience: reusable workflow ownership, schema validation, run-ID observability, deterministic marker triggering/retries, stable compile-cache compatibility, and workflow-first cleanup.
+- Connector write safety policy: every individual content write stays at or below 19 KB UTF-8; larger changes use verified deterministic gzip+Base64 patch payloads with checksums and exact changed-path validation.
 - **Strict on-demand context loading** so agents do not preload the whole skill/reference tree.
 
 ## Demand-driven context model
@@ -71,7 +73,7 @@ Loaded for implementation design/corrective planning and independent review, not
 
 `turn-based-coding-agent/modules/github-connector/MODULE.md`
 
-Loaded only for `github_connector`/`hybrid` access or GitHub Actions/artifact operations, then routes to the minimum detailed connector reference needed.
+Loaded only for `github_connector`/`hybrid` access or GitHub Actions/artifact operations, then routes to the minimum detailed connector reference needed. Patch/write safety, workflow policy, and temporary workflow lifecycle are separate demand-loaded references.
 
 ## Repository layout
 
@@ -88,12 +90,12 @@ turn-based-coding-agent-skill/
     ├── references/
     │   ├── core/
     │   ├── turns/
-    │   └── ...
+    │   └── github-connector-workflows/
     ├── templates/
     └── ...
 ```
 
-Legacy `references/04-*`, `05-*`, `06-*`, and `11-*` paths remain as tiny compatibility routers so existing handoffs can redirect to the focused turn files without loading old monolithic procedures.
+Legacy `references/04-*`, `05-*`, `06-*`, `10-*`, and `11-*` paths remain compatibility routers where applicable so existing handoffs can redirect to focused references without loading old monolithic procedures.
 
 ## Installation
 
