@@ -4,100 +4,160 @@
 
 ### Assuming a connector file is a local file
 
-A connector reference is not automatically available at `/mnt/data` or in a local checkout. Use connector reads, or explicitly download/copy through a supported action.
+A connector reference is not automatically available in a local sandbox. Use connector reads or an explicit download/copy action.
+
+### Exceeding the observed connector write ceiling
+
+Historical agent work has observed individual content writes around/above 20 KB being silently truncated without an error. Treat 19 KB UTF-8 as a hard ceiling for each `create_file`, `update_file`, and `create_blob` content payload.
+
+Preflight sizes and use `PATCH_APPLICATION.md` when one write would exceed the ceiling.
+
+### Assuming an atomic tree removes the write limit
+
+Atomic Git-data commits are useful for coherence, but each `create_blob` is still an individual connector content write and must remain <=19 KB.
 
 ### Updating related files one by one
 
-Sequential file commits can expose an inconsistent intermediate branch and generate many workflow runs. Use blobs/trees/commits for atomic multi-file changes.
+Sequential commits can expose inconsistent intermediate branch state and trigger workflows repeatedly. Use atomic Git-data commits when each individual blob is safely sized.
 
 ### Blindly retrying `409` writes
 
-`409` means the expected state changed. Re-fetch the file or branch head and rebuild the mutation.
+`409` means expected state changed. Re-fetch file/branch authority and rebuild the mutation.
 
 ### Force-updating a moving branch
 
-A forced `update_ref` can discard other work. Prefer non-force compare-and-swap behavior.
+A forced ref update can discard other work. Prefer non-force compare-and-swap behavior.
 
-## Workflow syntax and contexts
+### Creating unnecessary control branches
 
-### Using `runner.temp` in root-level `env`
+Work on the configured working branch. Create a temporary/control/staging branch only for a documented procedural blocker that cannot safely be resolved otherwise.
 
-This can be rejected as an unrecognized named value. Use a static path such as `/tmp/task-logs`, use `$RUNNER_TEMP` inside `run`, or reference `${{ runner.temp }}` only in a context where GitHub permits it, such as an individual step input.
+## Workflow syntax, reuse, and permissions
+
+### Guessing reusable workflow inputs
+
+Fetch the current reusable workflow and pass only inputs declared by `workflow_call.inputs`.
+
+### Under-provisioning caller permissions because a nested job is skipped
+
+Reusable workflow permission ceilings can be validated before runtime `if:` conditions. Compute the union required by every called reusable workflow/job, even conditionally skipped nested jobs.
+
+### Using `runner.temp` in an unsupported context
+
+Use a static `/tmp` path, `$RUNNER_TEMP` inside shell, or `${{ runner.temp }}` only where GitHub permits it.
 
 ### Creating logs inside the worktree
 
-This dirties source status and can accidentally enter commits or artifacts. Store activity logs under `/tmp` or the runner temp directory.
+This dirties source status and can enter commits/artifacts. Store logs in runner temporary storage.
 
 ### Initializing logs after checkout
 
-A checkout failure then leaves no diagnostic artifact. Create the log directory and metadata in the first step, before checkout.
+Checkout failure then leaves no durable diagnostics. Initialize logging first.
 
 ### Uploading logs only on success
 
-Use `if: always()`. A failure without a log artifact violates the evidence contract.
-
-### Combining logs and result artifacts
-
-A failed run may have no result package, but it must still have logs. Keep them separate.
+Use `if: always()` and keep diagnostic logs separate from successful results.
 
 ### Broad push triggers
 
-A workflow that commits files matching its own `paths` filter may retrigger repeatedly. Use exact unique marker paths or `workflow_dispatch`.
+A workflow that commits a path matching its own broad trigger can retrigger. Use one exact unique marker path.
+
+### Publishing malformed workflow YAML
+
+Draft outside `.github/workflows/**` when practical and validate against a current GitHub workflow schema before publication.
 
 ### Workflow self-modification
 
-Do not apply patches touching `.github/workflows/**` from inside Actions. Update workflow files externally through the connector.
+Do not modify `.github/workflows/**` from inside Actions. Publish workflow changes externally through the connector.
+
+## Run observability and triggering
+
+### Treating empty commit-run lookup as proof no push run exists
+
+Some connector run lookup surfaces can filter by event. For push-triggered workflows, use a run-ID observer or repository-wide run inventory before deciding a run is absent.
+
+### Combining caller installation and first marker creation
+
+The workflow may not be active early enough for the same commit's path trigger. Install/verify caller first; modify the marker in a separate later commit.
+
+### Retrying the marker because no run ID appeared immediately
+
+Delayed observability is not proof of missing execution. Query observer/repository-wide run inventory before retrying.
+
+### Cleaning marker before workflow
+
+Deleting a marker while the temporary caller is still active can trigger another run. Remove/disable the workflow caller first, then delete the marker.
 
 ## Patch transport
 
+### Base64 line wrapping or fragment newlines
+
+Compressed payload fragments must reconstruct the Base64 stream byte-for-byte. Do not add line wrapping, fragment newlines, whitespace, delimiters, or headers.
+
+### Skipping the encoded-payload checksum
+
+Verify the reconstructed encoded stream before Base64 decoding, then verify the decoded/decompressed patch checksum separately.
+
 ### Treating `git apply` failure as proof of a missing change
 
-The patch may already be applied. Compare final blob hashes first.
+The patch may already be applied or the base may have moved. Compare expected final blobs and base authority first.
 
-### Applying partial patches
+### Applying partial/fuzzy patches
 
-A partial application can leave a branch that is neither old nor intended. Require digest verification, preflight, exact post-apply blob checks, and transactional commit behavior.
+Require checksum verification, `git apply --check`, transactional application, `git diff --check`, exact changed-path verification, and expected output checks. Do not accept partial, reject-file, or unverified three-way results.
 
 ### Including workflow paths in implementation patches
 
-This can fail due to token scope and creates a self-modifying workflow hazard. Separate workflow changes from source patches.
+A workflow must not modify itself. Separate `.github/workflows/**` changes from patches applied inside Actions.
 
-### Reconstructing chunks in nondeterministic order
+### Nondeterministic fragment order
 
-Name parts with zero-padded numeric suffixes and sort using a stable locale before concatenation.
+Use zero-padded ordinal suffixes and a stable lexical order.
+
+## Caching
+
+### Per-run cache keys masquerading as compatibility keys
+
+Do not append run IDs, source SHAs, timestamps, turn names, or retry numbers when a reusable compile workflow owns a stable compiler-cache compatibility key.
+
+### Letting temporary callers own cache lineage
+
+Reusable compile workflow policy owns cache schema/compatibility/versioning. Temporary callers provide task/source inputs only.
+
+## Test execution
+
+### Timing out a required full-suite acceptance run
+
+Do not add a repository timeout whose purpose is to terminate the required full-suite semantic gate. A platform limit or explicit human cancellation is infrastructure/orchestration evidence, not pass/skip.
+
+### Zero selected tests counted as success
+
+A filter selecting zero tests is orchestration failure.
 
 ## Permissions and security
 
-### Missing `contents: write`
-
-A workflow that commits cannot push with a read-only token. Grant only the needed permission.
-
 ### Logging secrets with `set -x`
 
-Do not trace authentication setup, secret expansion, signed URLs, or token-bearing commands. Disable tracing around sensitive operations.
+Do not trace token expansion, authenticated URLs, or secret-bearing arguments.
 
 ### Using `pull_request_target` with untrusted code
 
-Never execute a fork's head code under elevated base-repository permissions.
+Never execute untrusted fork head code under elevated base-repository permissions.
 
-### Expecting fork PR workflows to push
+### Expecting default `GITHUB_TOKEN` pushes to trigger follow-up workflows
 
-Fork-triggered workflows commonly receive read-only tokens and no secrets.
+GitHub normally suppresses recursive workflow creation from default-token pushes. Use an authorized token only when follow-up trigger semantics are intentionally required.
 
 ## Evidence and closure
 
-### Closing a turn from a green step summary
+### Closing from a green step summary
 
-Verify exact source SHA, source status, artifact checksums, required contents, and the declared execution boundary.
+Verify exact source SHA, source status, artifact checksums, required contents, and execution boundary.
 
-### Claiming tests ran during compile-only work
+### Evidence upload failed after successful workload
 
-Report exactly what ran and what did not. Build success is not runtime correctness.
+Acceptance is incomplete. Required evidence must be retrievable.
 
-### Leaving trigger-only PRs open
+### Leaving temporary workflow/marker/payload debris
 
-They can continue to produce noise or repeated workflows. Close them after the authoritative source result lands.
-
-### Merging a stale trigger PR
-
-A marker-only PR should not be merged merely because its workflow once performed useful work elsewhere.
+Inspect configured temporary-state directories at start/end. Preserve durable workflows; clean temporary caller first, marker second, then payload/observation state.

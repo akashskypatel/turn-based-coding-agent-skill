@@ -32,6 +32,8 @@ Tool availability may vary. Discover the installed schema before declaring a cap
 | Create commit | `create_commit` |
 | Move branch ref | `update_ref` |
 
+**Write-size rule:** before any content-bearing write, estimate UTF-8 bytes. Keep each `create_file`, `update_file`, or `create_blob` content payload at or below **19 KB**. Load `PATCH_APPLICATION.md` when a desired write exceeds that boundary.
+
 ## Pull requests and issues
 
 | Need | Action |
@@ -61,9 +63,11 @@ Tool availability may vary. Discover the installed schema before declaring a cap
 | Re-run failed jobs | `rerun_failed_workflow_run_jobs` |
 | Commit status | `get_commit_combined_status` |
 
+`fetch_commit_workflow_runs` may not be authoritative for push-triggered runs when the connector filters by event. Load `WORKFLOW_POLICY.md` before using absence of run results as evidence.
+
 ## Selection rules
 
 - Prefer `fetch_file` over generic `fetch` when repository, path, and ref are known.
-- Prefer atomic Git data writes for coherent multi-file changes.
+- Prefer atomic Git data writes for coherent multi-file changes, while respecting the 19 KB ceiling on each individual blob/content write.
 - Prefer connector run/job/artifact actions before falling back to `gh`.
-- Use a remote workflow only for computation or repository operations the connector cannot directly perform.
+- Use a remote workflow only for computation or repository operations the connector cannot safely perform directly.

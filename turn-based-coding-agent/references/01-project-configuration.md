@@ -8,36 +8,45 @@ Resolve project-specific values before beginning work. Do not silently invent ma
 - `base_branch`: branch that receives completed phases.
 - `work_branch_prefix`: prefix for per-phase branches.
 - `todo_file`: authoritative root-level progress tracker.
-- `handoff_file`: concise live document under the project's agent-documentation directory; default to `.agents/HANDOFF.md` when no convention exists.
-- `agent_entry_points`: agent-facing entry documents that must link to the handoff, such as `AGENTS.md`, `CLAUDE.md`, `CODEX.md`, or repository-specific equivalents.
-- `milestone_tracker`: current milestone or implementation-state document.
-- `project_notes`: implementation notes, design records, white papers, and architecture documents.
-- `remediation_plan`: current implementation or remediation plan.
-- `results_directory`: existing test and benchmark evidence.
-- `failure_diagnostics`: prior failure analyses.
-- `build_commands`: commands or workflows for all affected build targets.
-- `test_commands`: focused, integration, and full-suite commands.
-- `benchmark_commands`: correctness and performance benchmark commands.
-- `remote_workflows`: workflow names, trigger paths, permissions, inputs, and artifact names when applicable.
+- `handoff_file`: concise live document under project agent documentation; default `.agents/HANDOFF.md` when no convention exists.
+- `agent_entry_points`: agent-facing entry documents that link to the handoff.
+- `milestone_tracker`, `project_notes`, `remediation_plan`, `results_directory`, `failure_diagnostics`: paths to project authority/evidence; record paths first and load on demand.
+- `build_commands`, `test_commands`, `benchmark_commands`: exact commands or workflows.
 - `repository_access_mode`: `local`, `github_connector`, or `hybrid`.
-- `github_workflow_policy`: repository-specific requirements for logging, artifacts, permissions, triggers, execution boundaries, and cleanup.
-- `review_policy`: `never`, `optional`, or criteria describing when an independent review should be used.
+- `review_policy`: `never`, `optional`, or criteria requiring independent review.
 - `turn_execution_mode`: `canonical`, `granular`, or `per_turn`.
-- `cb_execution_mode` and `tb_execution_mode`: defaults when `per_turn` is used.
-- `draft_patch_policy`: where a temporary CB-DRAFT patch may live, whether it may persist between agents, and how it is cleaned up after CB-APPLY.
-- `test_plan_policy`: authoritative path/pattern, required contents, evidence retention, and stop/rerun rules for the mandatory Test + Benchmark plan.
+- `cb_execution_mode`, `tb_execution_mode`: defaults when `per_turn` is used.
+- `draft_patch_policy`: temporary CB-DRAFT patch storage/persistence/cleanup.
+- `test_plan_policy`: authoritative TB plan path/pattern, required contents, evidence retention, stop/rerun rules.
 
-Use `templates/PROJECT_CONFIG.md` as the project-local configuration record. Use `templates/HANDOFF.md` for the live handoff.
+## GitHub connector/workflow configuration
 
-When `repository_access_mode` is `github_connector` or `hybrid`, load `references/10-github-connector-workflows.md` before any remote mutation or workflow execution.
+When GitHub connector/Actions are used, also resolve:
 
-When `turn_execution_mode` is `granular` or `per_turn`, load `references/11-granular-subturns.md` before beginning the affected canonical turn.
+- `connector_write_limit_bytes`: default `19000`; applies to every individual content-bearing connector write.
+- `patch_payload_encoding`: default `gzip+base64`.
+- `patch_payload_fragment_bytes`: default `19000` maximum.
+- `workflow_allowed_uses`: project allowlist; may be stricter than skill defaults.
+- `durable_compile_workflow`: reusable compile/build implementation, when provided.
+- `durable_run_observer_workflow`: reusable run-ID observer, when provided.
+- `durable_recent_runs_workflow`: repository-wide run inventory, when provided.
+- `durable_schema_validator_workflow`: workflow YAML validator, when provided.
+- `temporary_workflow_directory`, `trigger_marker_directory`, `workflow_observation_directory`, `patch_payload_directory`.
+- `workflow_permissions_policy`: least privilege plus reusable caller permission-union rules.
+- `workflow_cache_policy`: reusable workflow ownership of cache compatibility/versioning.
+- `full_suite_timeout_policy`: required acceptance suite runs organically unless project policy explicitly says otherwise.
+- `workflow_cleanup_policy` and `artifact_retention_policy`.
+- `regression_tracker`: optional durable regression/root-cause tracker required before TB closeout when configured.
+
+Use `templates/PROJECT_CONFIG.md` as the project-local configuration record and `templates/HANDOFF.md` for live resume state.
+
+When `repository_access_mode` is `github_connector` or `hybrid`, load `modules/github-connector/MODULE.md` and only the focused reference it routes to. Do not preload the GitHub reference directory.
 
 ## Execution-mode semantics
 
-- `canonical`: Code + Build and Test + Benchmark each execute as one turn, but still satisfy all granular responsibilities internally.
+- `canonical`: Code + Build and Test + Benchmark each execute as one turn while satisfying granular responsibilities internally.
 - `granular`: Code + Build exposes CB-DRAFT, CB-APPLY, CB-COMPILE, CB-CLOSEOUT; Test + Benchmark exposes TB-EXEC, TB-REVIEW, TB-PLAN.
-- `per_turn`: choose canonical or granular at the start of each canonical turn and record the choice in TODO/handoff before work.
+- `per_turn`: choose canonical or granular at each canonical turn start and record it in TODO/handoff.
 
 Granularity changes resumability and permission boundaries, not acceptance standards.
 
@@ -45,12 +54,12 @@ Granularity changes resumability and permission boundaries, not acceptance stand
 
 Resolve missing values from:
 
-1. The user's explicit instructions.
-2. Repository-root documentation.
-3. Existing TODO and milestone records.
-4. Architecture and design documents.
-5. CI and build definitions.
-6. Historical test and benchmark artifacts.
+1. User explicit instructions.
+2. Repository-root/agent policy documentation.
+3. Existing TODO, handoff, and milestone records.
+4. Architecture/design/contracts.
+5. CI/build definitions.
+6. Historical evidence cited by current state.
 
 Ask a clarifying question only when a material requirement remains unresolved and proceeding risks implementing the wrong contract.
 
@@ -58,32 +67,26 @@ Ask a clarifying question only when a material requirement remains unresolved an
 
 Unless repository policy is stricter, every created or modified workflow must:
 
-- initialize persistent logging before checkout or other fallible work;
-- retain detailed activity and command output on success and failure;
-- upload a dedicated log artifact under `if: always()` and `if-no-files-found: error`;
-- keep diagnostic logs separate from valid result/build artifacts;
-- avoid exposing tokens, secrets, credentials, or authenticated URLs;
-- preserve the active canonical turn and granular subturn boundary;
-- avoid modifying `.github/workflows/**` from inside a workflow.
+- follow `references/github-connector-workflows/WORKFLOW_POLICY.md`;
+- initialize persistent logging before checkout/fallible work;
+- retain detailed success/failure output and separate unconditional diagnostic logs;
+- use narrow triggers/concurrency, least privilege, exact source/hash checks, and external workflow-file mutation only;
+- validate workflow YAML before publication/trigger;
+- compute reusable caller permissions from the complete called workflow graph;
+- preserve the active turn/subturn boundary;
+- use workflow-first cleanup for temporary callers/markers;
+- avoid repository-imposed cutoff of a required full acceptance suite merely to cap elapsed runtime.
 
-Record artifact naming, retention, and failure-debugging requirements explicitly.
+Any connector content write must be <=19 KB UTF-8 unless project policy lowers that limit. Larger source changes use the verified compressed patch strategy in `PATCH_APPLICATION.md`.
 
 ## Scope statement
 
-Record:
-
-- The production behavior being implemented.
-- What is explicitly out of scope.
-- Required platforms and configurations.
-- Correctness invariants.
-- Failure behavior.
-- Performance or quality budgets.
-- Phase-level acceptance criteria.
+Record production behavior, explicit out-of-scope items, required platforms/configurations, correctness invariants, failure behavior, performance/quality budgets, and phase acceptance criteria.
 
 ## Engineering discipline
 
-Load `modules/engineering-guidelines/MODULE.md` before implementation planning. Project configuration should not silently authorize speculative complexity or broad refactoring. Record project-specific constraints only when they are real requirements.
+Load `modules/engineering-guidelines/MODULE.md` before implementation planning. Project configuration must not silently authorize speculative complexity or broad refactoring.
 
 ## Generalization check
 
-The configured objective must describe domain behavior, not one failing fixture. Rewrite fixture-specific goals into invariant-based goals before implementation.
+The objective must describe domain behavior, not one failing fixture. Rewrite fixture-specific goals into invariant-based goals before implementation.

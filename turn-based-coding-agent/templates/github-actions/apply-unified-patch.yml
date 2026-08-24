@@ -1,7 +1,8 @@
-# Idempotent remote patch application.
-# Replace YOUR_BRANCH and PATCH_* paths before use.
-# The patch is forbidden from modifying .github/workflows/**.
-name: Apply Connector Unified Patch
+# Verified remote application of a gzip+Base64 connector patch payload.
+# Replace YOUR_BRANCH, trigger path, payload path, and expected manifests before use.
+# Validate the resulting workflow YAML before publication.
+# The applied patch is forbidden from modifying .github/workflows/**.
+name: Apply Connector Patch Payload
 
 on:
   push:
@@ -20,7 +21,8 @@ concurrency:
 env:
   LOG_DIR: /tmp/connector-apply-patch-logs
   ACTIVITY_LOG: /tmp/connector-apply-patch-logs/activity.log
-  PATCH_DIR: .agents/patches/change
+  PAYLOAD_DIR: .agents/patches/change
+  ENCODED_FILE: /tmp/connector-change.patch.b64
   PATCH_FILE: /tmp/connector-change.patch
 
 jobs:
@@ -62,43 +64,61 @@ jobs:
               echo "finished_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
               git status --short --branch || true
               git diff --stat || true
+              git diff --cached --stat || true
             } | tee -a "$ACTIVITY_LOG"
             exit "$rc"
           }
           trap finish EXIT
 
-          expected_digest_file="$PATCH_DIR/change.patch.sha256"
-          expected_blobs_file="$PATCH_DIR/expected-blobs.tsv"
+          patch_digest_file="$PAYLOAD_DIR/change.patch.sha256"
+          encoded_digest_file="$PAYLOAD_DIR/change.patch.b64.sha256"
+          expected_paths_file="$PAYLOAD_DIR/expected-paths.txt"
+          expected_blobs_file="$PAYLOAD_DIR/expected-blobs.tsv"
 
-          test -f "$expected_digest_file"
+          test -f "$patch_digest_file"
+          test -f "$encoded_digest_file"
+          test -f "$expected_paths_file"
           test -f "$expected_blobs_file"
 
-          mapfile -d '' parts < <(find "$PATCH_DIR" -maxdepth 1 -type f \
-            -name 'change.patch.part-*' -print0 | LC_ALL=C sort -z)
+          mapfile -d '' parts < <(find "$PAYLOAD_DIR" -maxdepth 1 -type f \
+            -name 'change.patch.b64.part-*' -print0 | LC_ALL=C sort -z)
           test "${#parts[@]}" -gt 0
 
-          cat "${parts[@]}" > "$PATCH_FILE"
+          : > "$ENCODED_FILE"
+          for part in "${parts[@]}"; do
+            bytes=$(wc -c < "$part")
+            test "$bytes" -le 19000
+            cat "$part" >> "$ENCODED_FILE"
+          done
 
-          expected_digest=$(awk '{print $1}' "$expected_digest_file")
-          actual_digest=$(sha256sum "$PATCH_FILE" | awk '{print $1}')
-          test "$actual_digest" = "$expected_digest"
+          expected_encoded=$(awk '{print $1}' "$encoded_digest_file")
+          actual_encoded=$(sha256sum "$ENCODED_FILE" | awk '{print $1}')
+          test "$actual_encoded" = "$expected_encoded"
+
+          base64 --decode "$ENCODED_FILE" | gzip -dc > "$PATCH_FILE"
+
+          expected_patch=$(awk '{print $1}' "$patch_digest_file")
+          actual_patch=$(sha256sum "$PATCH_FILE" | awk '{print $1}')
+          test "$actual_patch" = "$expected_patch"
 
           if grep -Eq '^(---|\+\+\+) [ab]/\.github/workflows/' "$PATCH_FILE"; then
             echo "Patch modifies .github/workflows/**, which is forbidden." >&2
             exit 2
           fi
 
+          normalize_paths() {
+            sed '/^[[:space:]]*$/d' "$1" | LC_ALL=C sort -u
+          }
+
           outputs_match() {
             local expected path actual
             while IFS=$'\t' read -r expected path; do
               test -n "$expected" || continue
               test -n "$path" || return 1
-
               if [[ "$expected" == "DELETE" ]]; then
                 [[ ! -e "$path" ]] || return 1
                 continue
               fi
-
               [[ -f "$path" ]] || return 1
               actual=$(git hash-object "$path")
               [[ "$actual" == "$expected" ]] || return 1
@@ -106,19 +126,31 @@ jobs:
           }
 
           if outputs_match; then
-            echo "Every target already matches the expected output blobs; no-op success."
+            echo "All expected outputs already match; verified no-op."
             exit 0
           fi
 
-          set -x
           git apply --check "$PATCH_FILE"
           git apply --index "$PATCH_FILE"
+          git diff --check
           git diff --check --cached
-          set +x
+
+          actual_paths_file=/tmp/actual-paths.txt
+          expected_sorted_file=/tmp/expected-paths.txt
+          git diff --cached --name-only | LC_ALL=C sort -u > "$actual_paths_file"
+          normalize_paths "$expected_paths_file" > "$expected_sorted_file"
+          if ! cmp -s "$actual_paths_file" "$expected_sorted_file"; then
+            echo "Changed-path set differs from intended patch scope." >&2
+            echo "Expected:" >&2
+            cat "$expected_sorted_file" >&2
+            echo "Actual:" >&2
+            cat "$actual_paths_file" >&2
+            exit 3
+          fi
 
           if ! outputs_match; then
             echo "Post-apply output blob verification failed." >&2
-            exit 3
+            exit 4
           fi
 
           if git diff --cached --quiet; then
