@@ -20,6 +20,12 @@ If an exception is necessary:
 - keep the branch narrowly scoped;
 - remove/reset it as soon as the blocker is cleared.
 
+## Regression documentation gate
+
+When project configuration defines a durable regression/root-cause tracker, every Test + Benchmark turn that observes a regression must classify it and record root-cause analysis before the turn is durably closed.
+
+If evidence does not justify a stable regression identity or historical-count change, record a candidate/non-stable entry and state why stable totals remain unchanged. Runtime evidence is not durably closed merely because a workflow finished; required project regression documentation must also be committed.
+
 ## Allowed workflow uses
 
 A project may define a stricter allowlist. By default, agent-created workflows are appropriate only for:
