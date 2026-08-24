@@ -1,72 +1,28 @@
 # Engineering Guidelines Module
 
-Internal progressive-disclosure module for `turn-based-coding-agent`. Load this module before drafting or applying implementation changes and when independently reviewing a proposed implementation plan.
+**Context class:** `conditional-capability`
 
-The module distills the coding principles and examples from `multica-ai/andrej-karpathy-skills` into rules compatible with this skill's separated Code + Build and Test + Benchmark cadence.
+Load for implementation design/corrective planning (`CB-DRAFT`, canonical CB planning, `TB-PLAN`, independent Review). Do not load for routine `CB-APPLY`, `CB-COMPILE`, `CB-CLOSEOUT`, `TB-EXEC`, or evidence-only `TB-REVIEW`.
 
-## Core principles
+This module distills the integrated Karpathy-derived engineering guidance while preserving this skill's separated runtime-validation cadence.
 
-1. **Think before coding**
-   - State material assumptions instead of silently choosing them.
-   - When multiple interpretations materially change the implementation, identify them before editing.
-   - Prefer repository evidence and authoritative project documents over guesses.
-   - Identify a simpler viable approach when one exists.
-   - Ask only when a material ambiguity cannot be resolved safely from available evidence.
+## Working rules
 
-2. **Simplicity first**
-   - Implement the minimum behavior required by the active plan.
-   - Do not add speculative abstraction, configurability, features, or defensive machinery without a demonstrated requirement.
-   - Avoid infrastructure or patterns whose complexity exceeds the problem being solved.
-   - If a substantially smaller implementation satisfies the same contract, prefer it.
+1. Surface material assumptions; resolve from repository evidence before asking when possible.
+2. Prefer the simplest sufficient implementation; no speculative abstractions/features/configurability.
+3. Keep changes surgical and style-consistent; every changed line must trace to the objective, validation support, diagnostics, or build integration.
+4. Define observable success criteria, build verification, and future TB validation before approving the implementation plan.
 
-3. **Surgical changes**
-   - Every changed line must trace to the active objective, required validation support, diagnostics, or build integration.
-   - Match existing project style and conventions.
-   - Do not perform drive-by refactors, formatting changes, renames, comment rewrites, or dead-code cleanup.
-   - Remove only code made unused by the active change.
-   - Record unrelated issues instead of silently expanding scope.
+## Reference router
 
-4. **Goal-driven execution**
-   - Convert vague tasks into observable success criteria before implementation.
-   - Connect every planned change to a build check and future runtime validation.
-   - For defects, preserve or create a reproduction-oriented test scenario during Code + Build, then execute it only during Test + Benchmark.
-   - Use evidence from compile/test/benchmark results to decide whether another implementation loop is justified.
+Load only what the current design question requires:
 
-## Turn-workflow adaptation
+- General implementation/planning decision rules: `references/01-principles.md`.
+- Suspected overengineering, drive-by refactor, hidden assumption, style drift, or vague-goal pattern: `references/02-practical-patterns.md`.
+- Source/license/provenance audit of this module itself: `references/03-source-attribution.md` **only**. This is cold storage and must not be loaded during normal project work.
 
-The source guidance often describes writing and immediately running a test before fixing a defect. This skill preserves the intent while maintaining stricter turn separation:
+Do not preload the reference directory.
 
-```text
-Code + Build: design or author reproduction/regression coverage -> compile it
-Test + Benchmark: execute the reproduction/regression coverage
-Next Code + Build: correct remaining implementation defects when evidence requires it
-```
+## Turn adaptation
 
-When granular subturns are enabled:
-
-- **CB-DRAFT**: surface assumptions, choose the simplest sufficient approach, and draft only the necessary patch.
-- **CB-APPLY**: verify the applied diff remains surgical and matches project style.
-- **CB-COMPILE**: use compile evidence as the only implementation-loop gate; do not edit code here.
-- **CB-CLOSEOUT**: define verifiable TB acceptance criteria and an explicit test plan.
-- **TB-REVIEW / TB-PLAN**: challenge whether the evidence actually proves the intended behavior before proposing further code.
-
-## Progressive references
-
-Read only what is needed:
-
-- `references/01-principles.md` — detailed decision rules.
-- `references/02-practical-patterns.md` — adapted anti-patterns and preferred behaviors drawn from the source examples.
-- `references/03-source-attribution.md` — source links, license note, and integration rationale.
-
-## Non-negotiable checks before implementation
-
-Before approving a code patch, answer:
-
-- What exact contract or failure is being addressed?
-- Which assumptions are evidence-backed and which remain uncertain?
-- Is there a materially simpler implementation?
-- Does every changed line belong to this objective?
-- What build evidence will prove structural validity?
-- What later Test + Benchmark evidence will prove behavioral validity?
-
-If those questions do not have concrete answers, the implementation plan is not ready.
+For defects, author or preserve reproduction/regression source during Code + Build, compile it there, and execute it only during Test + Benchmark. The source material's immediate test-first loop is adapted to the parent skill's stricter turn separation.

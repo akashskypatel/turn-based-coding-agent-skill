@@ -6,90 +6,72 @@ A modular coding-agent skill for disciplined, recoverable software implementatio
 Code + Build -> Test + Benchmark -> [Optional Independent Review] -> Code + Build
 ```
 
-For finer workflow control, Code + Build and Test + Benchmark can optionally expose resumable subturns:
+Optional granular control:
 
 ```text
 CB-DRAFT -> CB-APPLY -> CB-COMPILE -> CB-CLOSEOUT
     ^                         |
     |------ compile FAIL -----|
 
-TB-EXEC -> TB-REVIEW -> TB-PLAN -> [Optional Independent Review]
+TB-EXEC -> TB-REVIEW -> TB-PLAN -> [Optional Review]
 ```
 
-Canonical turns remain valid; granular mode changes control and resumability, not safety or acceptance criteria.
+## Key features
 
-## Features
-
-- Strict Code + Build, Test + Benchmark, and optional Review separation.
-- Optional granular CB/TB subturns for patch review, application, compile gates, closeout, execution, evidence review, and planning.
-- Compile-fix loop that returns `CB-COMPILE` failures to `CB-DRAFT` rather than editing during the compile stage.
-- Mandatory Test + Benchmark plan drafted before every Code + Build closeout.
+- Strict Code + Build, Test + Benchmark, and optional independent Review boundaries.
+- Optional resumable CB/TB subturns for finer workflow control.
+- Mandatory Test + Benchmark plan produced by every Code + Build turn.
 - Exact pushed-commit provenance for builds and runtime evidence.
-- Recoverable phase branches, TODO tracking, and concise live handoffs that record exact canonical turn/subturn state.
-- Independent review agents may revise the next Code + Build plan without modifying source.
-- Integrated engineering-guidelines module emphasizing surfaced assumptions, simplicity, surgical diffs, and verifiable goals.
-- Testing-integrity rules that distinguish production defects from invalid fixtures, incorrect expectations, infrastructure failures, regressions, and nondeterminism.
-- Integrated research-backed unit-testing module for test design and review.
-- Connector-first remote operation through `@GitHub` with bounded GitHub Actions execution when required.
-- Progressive disclosure through focused references, modules, and reusable templates.
+- Recoverable phase branches, TODO tracking, and concise live handoffs.
+- Integrated unit-testing module for behavior-oriented test design/review.
+- Integrated engineering-guidelines module for assumptions, simplicity, surgical diffs, and verifiable goals.
+- Connector-first remote operation through `@GitHub` with bounded Actions execution.
+- **Strict on-demand context loading** so agents do not preload the whole skill/reference tree.
 
-## Granular Turn Control
+## Demand-driven context model
 
-### Code + Build
+`SKILL.md` is intentionally a small dispatcher. Normal resume should follow:
 
-- **CB-DRAFT** — inspect evidence and draft the intended source changes as a plain patch against an exact base commit. Do not mutate source.
-- **CB-APPLY** — apply the reviewed patch, verify the resulting diff, commit, and push ordinary source files. Do not compile or test.
-- **CB-COMPILE** — compile the exact pushed commit without changing code. On failure, return to CB-DRAFT.
-- **CB-CLOSEOUT** — write change documentation and the mandatory Test + Benchmark plan. No source/build/runtime changes.
+```text
+SKILL.md
+  -> project HANDOFF.md
+  -> exactly one references/turns/<STATE>.md
+  -> only triggered capability MODULE.md files
+  -> only specifically routed deep references/templates/evidence
+```
 
-### Test + Benchmark
+The handoff precomputes a `Context Load Plan` with `load_next`, conditional modules, and explicit `do_not_preload` guidance.
 
-- **TB-EXEC** — execute the authored test/benchmark plan and preserve raw evidence.
-- **TB-REVIEW** — review evidence against acceptance criteria and classify findings without changing code or running new unplanned validation.
-- **TB-PLAN** — produce corrective measures and the proposed next Code + Build plan; optionally request independent Review.
+Context tiers:
 
-See `turn-based-coding-agent/references/11-granular-subturns.md`.
+```text
+Tier 0  SKILL.md dispatcher
+Tier 1  current canonical turn/subturn file
+Tier 2  conditional capability modules
+Tier 3  deep references/templates/research
+```
 
-## Mandatory Test Planning
+Rules intentionally forbid reading sibling turn files, whole module reference directories, research/provenance, templates, or historical reports "for completeness."
 
-Every Code + Build turn must produce a concrete Test + Benchmark plan tied to the exact successfully compiled evidence commit/artifact. The plan specifies ordered validation commands, fixtures/inputs, acceptance criteria, benchmark baselines, evidence retention, and stop/rerun rules.
+## Integrated modules
 
-Template: `turn-based-coding-agent/templates/TEST_PLAN.md`.
+### Unit testing
 
-## Integrated Engineering Guidelines
+`turn-based-coding-agent/modules/unit-testing/`
 
-`turn-based-coding-agent/modules/engineering-guidelines/` incorporates and adapts guidance from:
+Loaded only when unit-test design, repair, diagnosis, or review is materially in scope. It is normally **not** loaded for `CB-COMPILE` or `TB-EXEC`.
 
-- `multica-ai/andrej-karpathy-skills/skills/karpathy-guidelines/SKILL.md`
-- `multica-ai/andrej-karpathy-skills/EXAMPLES.md`
+### Engineering guidelines
 
-The module makes four practices explicit throughout implementation and review:
+`turn-based-coding-agent/modules/engineering-guidelines/`
 
-- surface assumptions before coding;
-- prefer the simplest sufficient implementation;
-- keep changes surgical and style-consistent;
-- define observable goals and verification before implementation.
+Loaded for implementation design/corrective planning and independent review, not routine apply/compile/runtime execution.
 
-The external examples are distilled into project-agnostic anti-pattern guidance rather than copied verbatim. Source attribution and the turn-workflow adaptation are documented in `modules/engineering-guidelines/references/03-source-attribution.md`.
+### GitHub connector
 
-## Integrated Unit-Testing Module
+`turn-based-coding-agent/modules/github-connector/MODULE.md`
 
-Unit testing is bundled inside the skill at `turn-based-coding-agent/modules/unit-testing/` and is loaded only when unit-test design, repair, diagnosis, or review is in scope.
-
-It provides:
-
-- Contract-first, observable-behavior test design.
-- Unit-versus-integration boundary guidance.
-- Focused Arrange/Act/Assert scenarios.
-- Boundary, invalid-input, invariant, state-transition, and regression case design.
-- Robust values that expose ignored, swapped, or defaulted inputs.
-- Isolation of time, randomness, global state, infrastructure, and test ordering.
-- Fidelity-aware guidance for real collaborators, fakes, stubs, spies, and mocks.
-- Narrow semantic assertions and actionable failure diagnostics.
-- Counterfactual and optional mutation-testing review of test effectiveness.
-- Coverage treated as a risk/gap signal rather than proof of correctness.
-
-The module is subordinate to the turn cadence: unit-test source changes happen only during Code + Build; unit-test execution happens only during Test + Benchmark; optional Review may critique test design but may not edit it.
+Loaded only for `github_connector`/`hybrid` access or GitHub Actions/artifact operations, then routes to the minimum detailed connector reference needed.
 
 ## Repository layout
 
@@ -101,38 +83,29 @@ turn-based-coding-agent-skill/
     ├── SKILL.md
     ├── modules/
     │   ├── engineering-guidelines/
-    │   │   ├── MODULE.md
-    │   │   └── references/
+    │   ├── github-connector/
     │   └── unit-testing/
-    │       ├── MODULE.md
-    │       ├── references/
-    │       └── templates/
     ├── references/
-    │   └── 11-granular-subturns.md
+    │   ├── core/
+    │   ├── turns/
+    │   └── ...
     ├── templates/
-    │   ├── TEST_PLAN.md
-    │   └── SUBTURN_REPORT.md
     └── ...
 ```
 
-## Installation
+Legacy `references/04-*`, `05-*`, `06-*`, and `11-*` paths remain as tiny compatibility routers so existing handoffs can redirect to the focused turn files without loading old monolithic procedures.
 
-Clone the repository:
+## Installation
 
 ```bash
 git clone https://github.com/akashskypatel/turn-based-coding-agent-skill.git
-```
-
-### Bash
-
-```bash
 cd turn-based-coding-agent-skill/turn-based-coding-agent
 ./install.sh /path/to/skills
 ```
 
 Use `--force` to replace an existing installation.
 
-### PowerShell
+PowerShell:
 
 ```powershell
 Set-Location turn-based-coding-agent-skill\turn-based-coding-agent
@@ -141,16 +114,4 @@ Set-Location turn-based-coding-agent-skill\turn-based-coding-agent
 
 Use `-Force` to replace an existing installation.
 
-### Manual
-
-Copy the complete `turn-based-coding-agent` directory into the skills directory recognized by the coding-agent host. All internal modules are installed automatically.
-
-The resulting entry point is:
-
-```text
-/path/to/skills/turn-based-coding-agent/SKILL.md
-```
-
-## Use
-
-Invoke `turn-based-coding-agent` for the implementation project. Configure `canonical`, `granular`, or `per_turn` execution in the project configuration. The entry skill routes automatically to the engineering-guidelines and unit-testing modules when required.
+Manual installation: copy the complete `turn-based-coding-agent` directory into the coding-agent host's skills directory. The only installable skill entry point is `turn-based-coding-agent/SKILL.md`; internal modules are bundled automatically.

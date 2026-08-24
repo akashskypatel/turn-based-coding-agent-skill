@@ -19,15 +19,14 @@
 
 ## Scope Integrity
 
-- Engineering-guidelines module loaded when required:
-- Unit-testing module loaded when required:
+- Only current turn/subturn file loaded:
+- Conditional capability modules loaded only when triggered:
 - Unrelated changes introduced: no | explain
 - Turn-boundary violations: none | explain
 
 ## Subturn-Specific State
 
 ### CB-DRAFT
-
 - Patch base commit:
 - Patch artifact/reference:
 - Assumptions surfaced:
@@ -36,7 +35,6 @@
 - Source mutated: no
 
 ### CB-APPLY
-
 - Draft patch reference:
 - Resulting commit:
 - Resulting diff verified:
@@ -44,27 +42,21 @@
 - Compile/test executed: none
 
 ### CB-COMPILE
-
 - Exact pushed commit compiled:
 - Build targets:
 - Commands/workflows:
 - Result:
 - First actionable error on FAIL:
 - Tests/benchmarks executed: none
-- Next on PASS: CB-CLOSEOUT
-- Next on FAIL: CB-DRAFT
 
 ### CB-CLOSEOUT
-
 - Change documentation:
-- Test plan: `templates/TEST_PLAN.md` or project equivalent
+- Test plan reference:
 - Test plan evidence commit:
 - Acceptance criteria recorded:
 - Implementation/build/test logic changed: no
-- Next: TB-EXEC or canonical Test + Benchmark
 
 ### TB-EXEC
-
 - Test plan reference:
 - Artifact identity verified:
 - Commands executed:
@@ -73,7 +65,6 @@
 - Source/build/test logic changed: no
 
 ### TB-REVIEW
-
 - Test plan criteria reviewed:
 - Findings:
 - Failure classifications:
@@ -81,17 +72,27 @@
 - Source/test execution performed: none
 
 ### TB-PLAN
-
 - Phase status:
 - Proposed next Code + Build plan:
 - Plan status: authoritative | proposed_pending_review
 - Optional Review: skip | request
 - Source/test execution performed: none
 
+## Successor Context Load Plan
+
+- `load_next` primary file:
+- Conditional module triggers/paths:
+- Deep references already known to be required:
+- Templates to load only when producing artifacts:
+- Sibling turn files preloaded: no
+- Module reference directories preloaded: no
+- Research/provenance/examples preloaded: no
+
 ## Live Handoff
 
 - Path:
 - Updated next canonical turn:
-- Updated next subturn:
+- Updated next subturn/state:
+- Context Load Plan synchronized:
 - Exact resume instruction:
 - New lesson recorded, if any:
