@@ -20,6 +20,8 @@
 
 ## Authoritative Sources
 
+Store paths first; open contents only when the current state needs them.
+
 - Design documents: `docs/design/*.md`
 - Milestone tracker: `docs/MILESTONE_3.md`
 - Remediation plan: `docs/parser-remediation.md`
@@ -45,6 +47,33 @@ CB-DRAFT -> CB-APPLY -> CB-COMPILE
     ^                         |
     |------ compile FAIL -----|
 CB-COMPILE PASS -> CB-CLOSEOUT -> TB-EXEC -> TB-REVIEW -> TB-PLAN
+```
+
+## Context Loading Policy
+
+- Policy: `strict_on_demand`
+- Live handoff `load_next`: required, exactly one primary turn/subturn file
+- Preload sibling turn/subturn files: no
+- Preload capability-module reference directories: no
+- Preload templates: no
+- Research/provenance/examples during normal execution: no
+- Historical reports/results: only when cited by the handoff or current turn file
+
+Example successor load plan after a successful CB-COMPILE:
+
+```yaml
+load_next:
+  - references/turns/CB-CLOSEOUT.md
+conditional_modules: []
+deep_references: []
+templates_when_producing:
+  - templates/CODE_BUILD_REPORT.md
+  - templates/TEST_PLAN.md
+do_not_preload:
+  - sibling turn/subturn files
+  - module reference directories
+  - research/provenance/examples
+  - uncited historical reports
 ```
 
 ## Commands and Workflows
